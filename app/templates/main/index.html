@@ -3,4 +3,7 @@
 {% block app_content %}
     <h1>Hi, {{ current_user.username }}!</h1>
     <div><p>{{ text }}</p></div>
+    {% for area in areas %}
+        {% include 'main/_area_overview.html' %}
+    {% endfor %}
 {% endblock %}
