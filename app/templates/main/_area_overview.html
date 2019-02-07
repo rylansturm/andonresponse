@@ -3,7 +3,7 @@
             <td width="70px">
             </td>
             <td>
-                {{ area.name }}
+                <a href="{{ url_for('main.area', area_name=area.name) }}">{{ area.name }}</a>
             </td>
         </tr>
     </table>

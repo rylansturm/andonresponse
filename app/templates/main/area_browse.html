@@ -1,0 +1,14 @@
+{% extends "base.html" %}
+
+{% block app_content %}
+    <table>
+        <tr valign="top">
+            <td><h1>All Areas</h1></td>
+        </tr>
+    </table>
+    <p>Below is a list of all areas with timers currently installed.</p>
+    {% for area in areas %}
+        {% include 'main/_area_overview.html' %}
+    {% endfor %}
+    <hr>
+{% endblock %}

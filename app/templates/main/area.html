@@ -1,0 +1,13 @@
+{% extends "base.html" %}
+
+{% block app_content %}
+    <table>
+        <tr valign="top">
+            <td><h1>Area: {{ area.name }}</h1></td>
+        </tr>
+    </table>
+    {% if current_user in area.users %}
+    <p>You can edit stuff here!</p>
+    {% endif %}
+    <hr>
+{% endblock %}

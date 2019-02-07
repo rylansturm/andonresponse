@@ -28,7 +28,6 @@ class User(UserMixin, db.Model):
     areas = db.relationship(
         'Area', secondary=user_area,
         primaryjoin=(user_area.c.id_user == id),
-        # secondaryjoin=(user_area.c.id_area == 'area.id'),
         backref=db.backref('user', lazy='dynamic'), lazy='dynamic')
 
     def __repr__(self):
@@ -80,6 +79,21 @@ class KPI(db.Model):
     demand = db.Column(db.Integer)
     plan_cycle_time = db.Column(db.Integer)
 
+    def __repr__(self):
+        return '<KPI for {} {}>'.format(self.d, self.area.name)
+
+    def return_details(self):
+        return 'area={}' \
+               'date={}' \
+               'demand={}' \
+               'plan_cycle_time={}'.format(self.area, self.d, self.demand, self.plan_cycle_time)
+
+    def add_area(self, area):
+        self.id_area = Area.query.filter_by(name=area).first().id
+
+    def add_user(self, user):
+        self.user = user
+
 
 class Area(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -87,7 +101,6 @@ class Area(db.Model):
     users = db.relationship(
         'User', secondary=user_area,
         primaryjoin=(user_area.c.id_area == id),
-        # secondaryjoin=(user_area.c.id_area == 'area.id'),
         backref=db.backref('assigned_areas', lazy='dynamic'), lazy='dynamic')
     kpi = db.relationship('KPI', backref='area', lazy='dynamic')
 

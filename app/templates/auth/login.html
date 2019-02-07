@@ -8,4 +8,12 @@
             {{ wtf.quick_form(form) }}
         </div>
     </div>
+    <p>
+        Forgot Your Password?
+        <a href="{{ url_for('auth.reset_password_request') }}">Click to Reset It</a>
+    </p>
+    <p>
+        No account?
+        <a href="{{ url_for('auth.request_login') }}">Click to Request Login Credentials</a>
+    </p>
 {% endblock %}

@@ -1,0 +1,13 @@
+Admin,
+
+A request has been made by
+
+{{ name }}
+{{ email }}
+
+to access AndonResponse.com
+
+Please Resolve the Issue
+
+Sincerely,
+The Andon Response Team
