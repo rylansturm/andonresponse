@@ -3,7 +3,8 @@ from app import db
 from app.main.forms import EditProfileForm, CreateKPI
 from flask_login import current_user, login_required
 from app.models import User, Area, KPI
-from app.main import bp
+from app.main import bp, dates
+
 tempdir = 'main/'
 
 
@@ -40,6 +41,7 @@ def edit_profile():
 @bp.route('/area/<area_name>')
 @login_required
 def area(area_name):
+    week = dates.this_week()
     if area_name != 'all':
         area = Area.query.filter_by(name=area_name).first_or_404()
         return render_template(tempdir + 'area.html', area=area)
