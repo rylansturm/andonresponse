@@ -25,12 +25,16 @@
       <tbody>
         <tr>
           <th scope="row">Grave</th>
-          <td></td>
-          <td></td>
-          <td></td>
-          <td></td>
-          <td></td>
-          <td></td>
+          <td>
+              <a href="{{ url_for('main.area_date', area_name=area.name, date=week.monday[2]) }}">
+                  {{ week.monday[2] }}
+              </a>
+          </td>
+          <td>{{ week.tuesday[2] }}</td>
+          <td>{{ week.wednesday[2] }}</td>
+          <td>{{ week.thursday[2] }}</td>
+          <td>{{ week.friday[2] }}</td>
+          <td>{{ week.saturday[2] }}</td>
         </tr>
         <tr>
           <th scope="row">Day</th>

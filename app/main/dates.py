@@ -38,3 +38,7 @@ class Week(object):
         week = [_day[2] for _day in [self.monday, self.tuesday, self.wednesday,
                 self.thursday, self.friday, self.saturday]]
         return week
+
+
+def date_from_string(date: str):
+    return datetime.datetime.date(datetime.datetime.strptime(date, '%Y-%m-%d'))
