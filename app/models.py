@@ -23,9 +23,10 @@ area_shift = db.Table('area_shift',
                       db.Column('id_area', db.Integer, db.ForeignKey('area.id'), primary_key=True),
                       db.Column('id_shift', db.Integer, db.ForeignKey('shift.id'), primary_key=True)
                       )
+# TODO: user_shift table to connect users to their allowed shifts
 
 
-class User(UserMixin, db.Model):
+class User(UserMixin, db.Model):  # TODO: make admin and superadmin columns (or see if flask_login provides)
     id = db.Column(db.Integer, primary_key=True)
     username = db.Column(db.String(64), index=True, unique=True)
     email = db.Column(db.String(120), index=True, unique=True)
@@ -35,6 +36,7 @@ class User(UserMixin, db.Model):
         'Area', secondary=user_area,
         primaryjoin=(user_area.c.id_user == id),
         backref=db.backref('user', lazy='dynamic'), lazy='dynamic')
+    # TODO: relationship to user_shift
 
     def __repr__(self):
         return '<User {}>'.format(self.username)
@@ -82,6 +84,7 @@ class KPI(db.Model):
     id_user = db.Column(db.Integer, db.ForeignKey('user.id'))
     id_area = db.Column(db.Integer, db.ForeignKey('area.id'))
     id_shift = db.Column(db.Integer, db.ForeignKey('shift.id'))
+    # TODO: id_schedule
     d = db.Column(db.Date, index=True)
     demand = db.Column(db.Integer)
     plan_cycle_time = db.Column(db.Integer)
@@ -152,10 +155,12 @@ class Shift(db.Model):
     start = db.Column(db.Time)
     end = db.Column(db.Time)
     kpi = db.relationship('KPI', backref='shift', lazy='dynamic')
+    # TODO: relationship to schedule
     areas = db.relationship(
         'Area', secondary=area_shift,
         primaryjoin=(area_shift.c.id_shift == id),
         backref=db.backref('area_shifts', lazy='dynamic'), lazy='dynamic')
+    # TODO: relationship to user_shift
 
     def add_area(self, area):
         if not self.is_associated_with_area(area):
@@ -168,3 +173,9 @@ class Shift(db.Model):
     def is_associated_with_area(self, area):
         return self.areas.filter(
             area_shift.c.id_area == area.id).count() > 0
+
+# TODO: Schedule Class
+# TODO: Cycle Class
+# TODO: Andon Class
+# TODO: Process Class
+# TODO: Operator Class

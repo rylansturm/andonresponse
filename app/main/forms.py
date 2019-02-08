@@ -30,7 +30,7 @@ class CreateAreaForm(FlaskForm):
 class CreateKPI(FlaskForm):
     demand = IntegerField('Demand', validators=[DataRequired()])
     pct = IntegerField('Planned Cycle Time', validators=[DataRequired()])
-    shift = StringField('Shift', validators=[DataRequired()])
+    shift = StringField('Shift', validators=[DataRequired()])  # TODO: change to a SelectField (or SelectMultipleField?)
     date = DateField('Date', validators=[DataRequired()])
     area = StringField('Area', validators=[DataRequired()])
     submit = SubmitField('Create')

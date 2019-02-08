@@ -46,3 +46,6 @@ def date_from_string(date: str):
 
 def time_from_string(time: str):
     return datetime.datetime.time(datetime.datetime.strptime(time, '%I:%M %p'))
+
+
+# TODO: kpi_date
