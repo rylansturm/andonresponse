@@ -1,5 +1,6 @@
 from app import create_app, db
-from app.models import User, KPI, Area
+from app.models import User, KPI, Area, Shift
+import datetime
 
 
 app = create_app()
@@ -7,4 +8,5 @@ app = create_app()
 
 @app.shell_context_processor
 def make_shell_context():
-    return {'db': db, 'User': User, 'KPI': KPI, 'Area': Area}
+    return {'db': db, 'User': User, 'KPI': KPI, 'Area': Area,
+            'Shift': Shift, 'datetime': datetime}

@@ -37,24 +37,24 @@ class UserModelCase(unittest.TestCase):
 
         u.add_area(a)
         db.session.commit()
-        self.assertTrue(u.is_assigned(a))
+        self.assertTrue(u.is_assigned_area(a))
         self.assertEqual(u.areas.count(), 1)
         self.assertEqual(u.areas.first().name, 'Talladega')
 
         u.rm_area(a)
         db.session.commit()
-        self.assertFalse(u.is_assigned(a))
+        self.assertFalse(u.is_assigned_area(a))
         self.assertEqual(u.areas.count(), 0)
 
         a.add_user(u)
         db.session.commit()
-        self.assertTrue(a.is_assigned(u))
+        self.assertTrue(a.is_assigned_user(u))
         self.assertEqual(a.users.count(), 1)
         self.assertEqual(a.users.first().username, 'john')
 
         a.rm_user(u)
         db.session.commit()
-        self.assertFalse(a.is_assigned(u))
+        self.assertFalse(a.is_assigned_user(u))
         self.assertEqual(a.users.count(), 0)
 
 

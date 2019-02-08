@@ -1,8 +1,10 @@
 from flask_wtf import FlaskForm
-from wtforms import StringField, SubmitField, DateField, IntegerField
+from wtforms import StringField, SubmitField, IntegerField, TimeField, SelectMultipleField
+from wtforms.fields.html5 import DateField
 from wtforms.validators import DataRequired, ValidationError
-from app.models import User, Area
+from app.models import User, Area, Shift
 import datetime
+from app.main.dates import time_from_string as tfs
 
 
 class EditProfileForm(FlaskForm):
@@ -26,9 +28,10 @@ class CreateAreaForm(FlaskForm):
 
 
 class CreateKPI(FlaskForm):
-    date = DateField('Date', validators=[DataRequired()])
     demand = IntegerField('Demand', validators=[DataRequired()])
     pct = IntegerField('Planned Cycle Time', validators=[DataRequired()])
+    shift = StringField('Shift', validators=[DataRequired()])
+    date = DateField('Date', validators=[DataRequired()])
     area = StringField('Area', validators=[DataRequired()])
     submit = SubmitField('Create')
 
@@ -36,7 +39,49 @@ class CreateKPI(FlaskForm):
         super(CreateKPI, self).__init__(*args, **kwargs)
         self.user = user_name
 
-    def validate_area(self, user):
-        a = Area.query.filter_by(name=self.area.data).first()
+    def validate_area(self, area):
+        a = Area.query.filter_by(name=area.data).first()
         if a not in self.user.areas:
             raise ValidationError('You are not assigned to this area')
+
+
+class CreateShift(FlaskForm):
+    name = StringField('Name', validators=[DataRequired()])
+    start = TimeField('Start Time', validators=[DataRequired()], format="%I:%M %p")
+    end = TimeField('End Time', validators=[DataRequired()], format="%I:%M %p")
+    submit = SubmitField('Submit')
+
+    def __init__(self, area, user, *args, **kwargs):
+        super(CreateShift, self).__init__(*args, **kwargs)
+        self.area = area
+        self.user = user
+
+    def validate_name(self, name):
+        names = [s.name for s in Shift.query.all()]
+        if name.data in names:
+            raise ValidationError('This shift already exists')
+        a = Area.query.filter_by(name=self.area).first()
+        if a not in self.user.areas:
+            raise ValidationError('You are not assigned to this area')
+
+    def validate_start(self, start):
+        a = Area.query.filter_by(name=self.area).first()
+        starts = [s.start for s in a.shifts.all()]
+        ends = [s.end for s in a.shifts.all()]
+        for i in range(len(starts)):
+            if starts[i] < start.data < ends[i] or\
+                    start.data < ends[i] < starts[i]:
+                raise ValidationError('This schedule conflicts with other shift times')
+        if self.start.data == self.end.data:
+            raise ValidationError('These times are the same')
+
+    def validate_end(self, end):
+        a = Area.query.filter_by(name=self.area).first()
+        starts = [s.start for s in a.shifts.all()]
+        ends = [s.end for s in a.shifts.all()]
+        for i in range(len(starts)):
+            if starts[i] < end.data < ends[i] or\
+                    end.data < ends[i] < starts[i]:
+                raise ValidationError('This schedule conflicts with other shift times')
+        if self.start.data == self.end.data:
+            raise ValidationError('These times are the same')

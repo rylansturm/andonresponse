@@ -42,3 +42,7 @@ class Week(object):
 
 def date_from_string(date: str):
     return datetime.datetime.date(datetime.datetime.strptime(date, '%Y-%m-%d'))
+
+
+def time_from_string(time: str):
+    return datetime.datetime.time(datetime.datetime.strptime(time, '%I:%M %p'))

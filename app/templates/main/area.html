@@ -11,49 +11,38 @@
     {% endif %}
     <hr>
     <table class="table table-striped table-bordered">
-      <thead>
+        <thead>
         <tr>
-          <th scope="col">Shift</th>
-          <th scope="col">Monday</th>
-          <th scope="col">Tuesday</th>
-          <th scope="col">Wednesday</th>
-          <th scope="col">Thursday</th>
-          <th scope="col">Friday</th>
-          <th scope="col">Saturday</th>
+            <th scope="col">Shift</th>
+            <th scope="col">Monday</th>
+            <th scope="col">Tuesday</th>
+            <th scope="col">Wednesday</th>
+            <th scope="col">Thursday</th>
+            <th scope="col">Friday</th>
+            <th scope="col">Saturday</th>
         </tr>
-      </thead>
-      <tbody>
-        <tr>
-          <th scope="row">Grave</th>
-          <td>
-              <a href="{{ url_for('main.area_date', area_name=area.name, date=week.monday[2]) }}">
-                  {{ week.monday[2] }}
-              </a>
-          </td>
-          <td>{{ week.tuesday[2] }}</td>
-          <td>{{ week.wednesday[2] }}</td>
-          <td>{{ week.thursday[2] }}</td>
-          <td>{{ week.friday[2] }}</td>
-          <td>{{ week.saturday[2] }}</td>
-        </tr>
-        <tr>
-          <th scope="row">Day</th>
-          <td></td>
-          <td></td>
-          <td></td>
-          <td></td>
-          <td></td>
-          <td></td>
-        </tr>
-        <tr>
-          <th scope="row">Swing</th>
-          <td></td>
-          <td></td>
-          <td></td>
-          <td></td>
-          <td></td>
-          <td></td>
-        </tr>
-      </tbody>
+        </thead>
+        <tbody>
+        {% for shift in area.shifts %}
+            <tr>
+                <th scope="row">{{ shift.name }}</th>
+                {% for day in week.get_dates_list() %}
+                    {% if area.kpi.filter(KPI.d==day, KPI.shift==shift).first() %}
+                    <td>
+                        <a href="{{ url_for('main.create_kpi', area_name=area.name, shift=shift.name, date=day) }}">
+                                {{ area.kpi.filter(KPI.d==day, KPI.shift==shift).first().demand }}
+                        </a>
+                    </td>
+                    {% else %}
+                    <td>
+                        <a href="{{ url_for('main.create_kpi', area_name=area.name, shift=shift.name, date=day) }}">
+                            Add
+                        </a>
+                    </td>
+                    {% endif %}
+                {% endfor %}
+        {% endfor %}
+            </tr>
+        </tbody>
     </table>
 {% endblock %}
