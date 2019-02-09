@@ -1,10 +1,8 @@
 from flask_wtf import FlaskForm
-from wtforms import StringField, SubmitField, IntegerField, TimeField, SelectMultipleField
+from wtforms import StringField, SubmitField, IntegerField, TimeField, SelectField, TextAreaField
 from wtforms.fields.html5 import DateField
 from wtforms.validators import DataRequired, ValidationError
-from app.models import User, Area, Shift
-import datetime
-from app.main.dates import time_from_string as tfs
+from app.models import Area, Shift, User
 
 
 class EditProfileForm(FlaskForm):
@@ -26,12 +24,22 @@ class CreateAreaForm(FlaskForm):
     name = StringField('Area Name', validators=[DataRequired()])
     submit = SubmitField('Submit')
 
+    def validate_name(self, name):
+        if name.data in [a.name for a in Area.query.all()]:
+            raise ValidationError('This area already exists')
+
+
+class AssignAreaForm(FlaskForm):
+    areas = TextAreaField("Assign Areas",
+                          description='separate each area with a comma')
+    submit = SubmitField('Submit')
+
 
 class CreateKPI(FlaskForm):
-    demand = IntegerField('Demand', validators=[DataRequired()])
-    pct = IntegerField('Planned Cycle Time', validators=[DataRequired()])
-    shift = StringField('Shift', validators=[DataRequired()])  # TODO: change to a SelectField (or SelectMultipleField?)
-    date = DateField('Date', validators=[DataRequired()])
+    demand = IntegerField('Demand (good parts)', validators=[DataRequired()])
+    pct = IntegerField('Planned Cycle Time (seconds)', validators=[DataRequired()])
+    shift = SelectField('Shift', validators=[DataRequired()])
+    date = DateField('Date (at end of shift)', validators=[DataRequired()])
     area = StringField('Area', validators=[DataRequired()])
     submit = SubmitField('Create')
 

@@ -1,13 +1,28 @@
 {% extends "base.html" %}
+{% import 'bootstrap/wtf.html' as wtf %}
 
 {% block app_content %}
-    <table>
+    <table valign="top">
         <tr valign="top">
             <td><h1>User: {{ user.username }}</h1></td>
         </tr>
     </table>
-    {% if user == current_user %}
-    <p><a href="{{ url_for('main.edit_profile') }}">Edit your profile</a></p>
-    {% endif %}
     <hr>
+    <table class="table table-bordered">
+        <thead>
+        <tr>
+            <th scope="col"><h2>Areas</h2></th>
+            <th scope="col"><h2>Shifts</h2></th>
+            <th scope="col"><h2>Admin</h2></th>
+        </tr>
+        </thead>
+        <tr>
+            <td>
+                {{ wtf.quick_form(area_form) }}
+                <p>All Areas:</p>
+                <p>{{ area_string }}</p>
+            </td>
+        </tr>
+
+    </table>
 {% endblock %}

@@ -1,10 +1,12 @@
 from flask import render_template, flash, redirect, url_for, request
 from app import db
-from app.main.forms import EditProfileForm, CreateKPI, CreateAreaForm, CreateShift
+from app.main.forms import EditProfileForm, CreateKPI, CreateAreaForm, \
+    CreateShift, AssignAreaForm
 from flask_login import current_user, login_required
 from app.models import User, Area, KPI, Shift
 from app.main import bp
-from app.main.dates import Week, date_from_string
+from functions.dates import Week, date_from_string
+from functions.text import convert_text_area_to_list as conv
 import datetime
 
 tempdir = 'main/'
@@ -19,11 +21,29 @@ def index():
     return render_template(tempdir + 'index.html', title='Home', areas=areas, text=text)
 
 
-@bp.route('/user/<username>')
+@bp.route('/user/<username>', methods=['GET', 'POST'])
 @login_required
 def user(username):
     user = User.query.filter_by(username=username).first_or_404()
-    return render_template(tempdir + 'user.html', user=user)
+    all_areas = Area.query.all()
+    area_string = ', '.join([a.name for a in all_areas])
+    user_areas = user.areas.all()
+    area_form = AssignAreaForm()
+    if area_form.validate_on_submit():
+        areas = conv(area_form.areas.data)
+        for area in all_areas:
+            user.rm_area(area)
+        db.session.commit()
+        for area in areas:
+            a = Area.query.filter_by(name=area.capitalize()).first()
+            if a in all_areas:
+                user.add_area(a)
+        db.session.commit()
+        return redirect(url_for('main.user', username=username))
+    elif request.method == 'GET':
+        area_form.areas.data = ', '.join([a.name for a in user_areas])
+    return render_template(tempdir + 'user.html', user=user, user_areas=user_areas, area_string=area_string,
+                           all_areas=all_areas, area_form=area_form)
 
 
 @bp.route('/edit_profile', methods=['GET', 'POST'])
@@ -52,10 +72,11 @@ def area(area_name):
 def create_area():
     form = CreateAreaForm()
     if form.validate_on_submit():
-        area = Area(name=form.name.data)
+        area = Area(name=form.name.data.capitalize())
         db.session.add(area)
         db.session.commit()
-        return redirect(url_for('main.area', area_name='all'))
+        flash('Area {} added'.format(area.name))
+        return redirect(url_for('main.create_area'))
     return render_template(tempdir + 'create_area.html', title='Create New Area', form=form)
 
 
@@ -65,16 +86,17 @@ def area_date(area_name, date):
     week = Week(date=date_from_string(date))
     if area_name != 'all':
         area = Area.query.filter_by(name=area_name).first_or_404()
-        return render_template(tempdir + 'area.html', area=area, week=week, KPI=KPI)
+        return render_template(tempdir + 'area.html', area=area, week=week, KPI=KPI, user=current_user)
     else:
         areas = Area.query.order_by(Area.name.asc()).all()
-        return render_template(tempdir + 'area_browse.html', areas=areas, week=week)
+        return render_template(tempdir + 'area_browse.html', areas=areas, week=week, user=current_user)
 
 
 @bp.route('/area/<area_name>/edit/kpi/<shift>/<date>', methods=['GET', 'POST'])
 @login_required
 def create_kpi(area_name, shift, date):
-    form = CreateKPI(current_user, Area.query.filter_by(name=area_name).first())
+    form = CreateKPI(current_user)
+    form.shift.choices = [(s.name, s.name) for s in Shift.query.all()]
     if form.validate_on_submit():
         d = form.date.data
         demand = form.demand.data
