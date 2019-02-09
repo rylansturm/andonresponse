@@ -70,14 +70,45 @@ def area(area_name):
 @bp.route('/create_area', methods=['GET', 'POST'])
 @login_required
 def create_area():
-    form = CreateAreaForm()
+    form = CreateAreaForm(original_name=None)
+    all_shifts = Shift.query.all()
     if form.validate_on_submit():
         area = Area(name=form.name.data.capitalize())
+        shifts = conv(form.shifts.data)
         db.session.add(area)
+        for shift in shifts:
+            if shift.capitalize() in [s.name for s in all_shifts]:
+                area.add_shift(Shift.query.filter_by(name=shift.capitalize()).first())
         db.session.commit()
         flash('Area {} added'.format(area.name))
         return redirect(url_for('main.create_area'))
+    elif request.method == 'GET':
+        form.shifts.data = ', '.join([s.name for s in all_shifts])
     return render_template(tempdir + 'create_area.html', title='Create New Area', form=form)
+
+
+@bp.route('/area/<area_name>/config', methods=['GET', 'POST'])
+@login_required
+def config_area(area_name):
+    form = CreateAreaForm(original_name=area_name)
+    area = Area.query.filter_by(name=area_name).first()
+    all_shifts = Shift.query.all()
+    if form.validate_on_submit():
+        area.name = form.name.data
+        shifts = conv(form.shifts.data)
+        for shift in all_shifts:
+            area.rm_shift(shift)
+        db.session.commit()
+        for shift in shifts:
+            if shift.capitalize() in [s.name for s in all_shifts]:
+                area.add_shift(Shift.query.filter_by(name=shift.capitalize()).first())
+        db.session.commit()
+        flash('Area {} configured'.format(area.name))
+        return redirect(url_for('main.area', area_name=area.name))
+    elif request.method == 'GET':
+        form.name.data = area.name
+        form.shifts.data = ', '.join(a.name for a in area.shifts.all())
+    return render_template(tempdir + 'create_area.html', title='Configure Area:', form=form, area=area.name)
 
 
 @bp.route('/area/<area_name>/<date>')
@@ -126,19 +157,17 @@ def create_kpi(area_name, shift, date):
     return render_template(tempdir + 'create_kpi.html', form=form)
 
 
-@bp.route('/area/<area_name>/create/shift', methods=['GET', 'POST'])
+@bp.route('/create_shift', methods=['GET', 'POST'])
 @login_required
-def create_shift(area_name):
-    a = Area.query.filter_by(name=area_name).first_or_404()
-    form = CreateShift(area_name, current_user)
+def create_shift():
+    form = CreateShift()
     if form.validate_on_submit():
         name = form.name.data
         start = form.start.data
         end = form.end.data
         s = Shift(name=name, start=start, end=end)
         db.session.add(s)
-        s.add_area(a)
         db.session.commit()
         flash('You shift has been added')
-        return redirect(url_for('main.area', area_name=area_name))
+        return redirect(url_for('main.area', area_name='all'))
     return render_template(tempdir + 'create_shift.html', form=form)
