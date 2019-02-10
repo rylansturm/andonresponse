@@ -1,7 +1,7 @@
 from flask import render_template, flash, redirect, url_for, request
 from app import db
 from app.main.forms import EditProfileForm, CreateKPI, CreateAreaForm, \
-    CreateShift, AssignAreaForm
+    CreateShift, AssignAreaForm, AssignShiftForm
 from flask_login import current_user, login_required
 from app.models import User, Area, KPI, Shift
 from app.main import bp
@@ -25,12 +25,16 @@ def index():
 @login_required
 def user(username):
     user = User.query.filter_by(username=username).first_or_404()
-    all_areas = Area.query.all()
+    all_areas = Area.query.order_by(Area.name.asc()).all()
+    all_shifts = Shift.query.all()
     area_string = ', '.join([a.name for a in all_areas])
-    user_areas = user.areas.all()
+    shift_string = ', '.join([s.name for s in all_shifts])
+    user_areas = user.areas.order_by(Area.name.asc()).all()
+    user_shifts = user.shifts.all()
     area_form = AssignAreaForm()
-    if area_form.validate_on_submit():
-        areas = conv(area_form.areas.data)
+    shift_form = AssignShiftForm()
+    if area_form.validate_on_submit() and area_form.submit1.data:
+        areas = conv(area_form.items.data)
         for area in all_areas:
             user.rm_area(area)
         db.session.commit()
@@ -40,10 +44,22 @@ def user(username):
                 user.add_area(a)
         db.session.commit()
         return redirect(url_for('main.user', username=username))
+    elif shift_form.validate_on_submit() and shift_form.submit2.data:
+        shifts = conv(shift_form.items.data)
+        for shift in all_shifts:
+            user.rm_shift(shift)
+        db.session.commit()
+        for shift in shifts:
+            s = Shift.query.filter_by(name=shift.capitalize()).first()
+            if s in all_shifts:
+                user.add_shift(s)
+        db.session.commit()
+        return redirect(url_for('main.user', username=username))
     elif request.method == 'GET':
-        area_form.areas.data = ', '.join([a.name for a in user_areas])
+        area_form.items.data = ', '.join([a.name for a in user_areas])
+        shift_form.items.data = ', '.join([s.name for s in user_shifts])
     return render_template(tempdir + 'user.html', user=user, user_areas=user_areas, area_string=area_string,
-                           all_areas=all_areas, area_form=area_form)
+                           all_areas=all_areas, area_form=area_form, shift_form=shift_form, shift_string=shift_string)
 
 
 @bp.route('/edit_profile', methods=['GET', 'POST'])
@@ -121,6 +137,15 @@ def area_date(area_name, date):
     else:
         areas = Area.query.order_by(Area.name.asc()).all()
         return render_template(tempdir + 'area_browse.html', areas=areas, week=week, user=current_user)
+
+
+# TODO: area_schedules to display currently available schedules and info about each (use sub-template)
+# TODO: schedule_edit as form to change the schedule information
+@bp.route('/area/<area_name>/schedules', methods=['GET', 'POST'])
+@login_required
+def area_schedules(area_name):
+    area = Area.query.filter_by(name=area_name).first()
+    return render_template(tempdir + 'area_schedules.html', area=area)
 
 
 @bp.route('/area/<area_name>/edit/kpi/<shift>/<date>', methods=['GET', 'POST'])

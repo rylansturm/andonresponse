@@ -67,7 +67,10 @@ def time_from_string(time):
         elif _type == datetime.datetime:
             return datetime.datetime.time(time)
         else:
-            return datetime.datetime.time(datetime.datetime.strptime(time, '%I:%M %p'))
+            try:
+                return datetime.datetime.time(datetime.datetime.strptime(time, '%I:%M %p'))
+            except ValueError:
+                return datetime.datetime.time(datetime.datetime.strptime(time, '%H:%M:%S'))
     except ValueError:
         return time
     except TypeError:
@@ -85,3 +88,29 @@ def datetime_from_string(time):
         return time
     except TypeError:
         return time
+
+
+def datetime_from_time(time: datetime.time, date: datetime.date=datetime.date.today()):
+    """ returns a datetime.datetime object with today's date, given a datetime.time object """
+    if type(time) == datetime.time:
+        return datetime.datetime.combine(date, time)
+    else:
+        return time
+
+
+def get_available_time(times: list):
+    """ given a list of datetime.time or datetime.datetime objects, return the available time (datetime.timedelta).
+     list passed must be all of the plan times in order, alternating between start and stop times"""
+    available_time = datetime.timedelta(0)
+    for time in times:
+        if time:
+            t = datetime_from_time(time)
+            if times.index(time) > 0 and t < times[times.index(time)-1]:
+                t += datetime.timedelta(1)
+            times[times.index(time)] = t
+    for i in range(len(times) // 2):
+        try:
+            available_time += times[2*i+1] - times[2*i]
+        except TypeError:
+            pass
+    return available_time

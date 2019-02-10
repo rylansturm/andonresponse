@@ -1,7 +1,7 @@
 from time import time
 import jwt
 from app import db, login
-from functions.dates import datetime_from_string as dtfs
+from functions.dates import time_from_string as tfs, get_available_time as gat
 from werkzeug.security import generate_password_hash, check_password_hash
 from flask_login import UserMixin
 from flask import current_app
@@ -106,7 +106,6 @@ class KPI(db.Model):
     id_user = db.Column(db.Integer, db.ForeignKey('user.id'))
     id_area = db.Column(db.Integer, db.ForeignKey('area.id'))
     id_shift = db.Column(db.Integer, db.ForeignKey('shift.id'))
-    id_schedule = db.Column(db.Integer, db.ForeignKey('schedule.id'))
     d = db.Column(db.Date, index=True)
     demand = db.Column(db.Integer)
     plan_cycle_time = db.Column(db.Integer)
@@ -219,31 +218,34 @@ class Shift(db.Model):
 
 
 class Schedule(db.Model):
+    """ This model defines a generic schedule, unaware of date, used for assignment.
+    The AvailableTime class defines the specific, date-aware schedule for each shift. """
     id = db.Column(db.Integer, primary_key=True)
     id_area = db.Column(db.Integer, db.ForeignKey('area.id'))
     id_shift = db.Column(db.Integer, db.ForeignKey('shift.id'))
-    kpi = db.relationship('KPI', backref='schedule', lazy='dynamic')
     name = db.Column(db.String(24))
-    available_time = db.Column(db.Integer)
-    start1 = db.Column(db.DateTime)
-    start2 = db.Column(db.DateTime)
-    start3 = db.Column(db.DateTime)
-    start4 = db.Column(db.DateTime)
-    end1 = db.Column(db.DateTime)
-    end2 = db.Column(db.DateTime)
-    end3 = db.Column(db.DateTime)
-    end4 = db.Column(db.DateTime)
+    start1 = db.Column(db.Time)
+    start2 = db.Column(db.Time)
+    start3 = db.Column(db.Time)
+    start4 = db.Column(db.Time)
+    end1 = db.Column(db.Time)
+    end2 = db.Column(db.Time)
+    end3 = db.Column(db.Time)
+    end4 = db.Column(db.Time)
 
     def __repr__(self):
-        return '<{} {} Schedule {}>'.format(self.schedule_area, self.schedule_shift, self.kpi.d)
+        return '<{} {} {} Schedule>'.format(self.schedule_area.name, self.schedule_shift.name, self.name)
 
     def return_times_list(self):
         return [self.start1, self.end1, self.start2, self.end2,
                 self.start3, self.end3, self.start4, self.end4]
 
-    def get_times_list(self, **kwargs):
+    def make_times_list(self, **kwargs):
         for key, value in kwargs.items():
-            exec('self.{} = dtfs{}'.format(key, value))
+            exec("self.{} = tfs('{}')".format(key, value))
+
+    def get_available_time(self):
+        return gat(self.return_times_list())
 
 # TODO: Cycle Class
 # TODO: Andon Class

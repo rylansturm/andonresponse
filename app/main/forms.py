@@ -35,9 +35,13 @@ class CreateAreaForm(FlaskForm):
 
 
 class AssignAreaForm(FlaskForm):
-    areas = TextAreaField("Assign Areas",
-                          description='separate each area with a comma')
-    submit = SubmitField('Submit')
+    items = TextAreaField(label='Assign Areas', description='separate each area with a comma')
+    submit1 = SubmitField('Submit')
+
+
+class AssignShiftForm(FlaskForm):
+    items = TextAreaField(label='Assign Shifts', description='separate each area with a comma')
+    submit2 = SubmitField('Submit')
 
 
 class CreateKPI(FlaskForm):
