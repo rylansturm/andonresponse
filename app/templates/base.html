@@ -47,3 +47,11 @@
         {% block app_content %}{% endblock %}
     </div>
 {% endblock %}
+
+{% block scripts %}
+    <script>
+        $('#shift').change(function(event) {
+            $('#update').html('This is ' + $('#shift').val() + ' and other info');
+        });
+    </script>
+{% endblock %}

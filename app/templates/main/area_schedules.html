@@ -2,9 +2,11 @@
 
 {% block app_content %}
     <table>
+        <tr valign="bottom">
+            <td><h1>{{ area.name }}</h1></td>
+        </tr>
         <tr valign="top">
-            <td><h1>[[ area.name ]]</h1></td>
-            <td><h2>[[ shift.name ]]</h2></td>
+            <td><h2>{{ shift.name }}</h2></td>
         </tr>
     </table>
     <p>Below is a list of all schedules available for this team</p>
@@ -12,4 +14,10 @@
         {% include 'main/_team_schedules.html' %}
     {% endfor %}
     <hr>
+    <p>
+        <a href="{{ url_for('main.config_schedule', area_name=area.name,
+                           shift_name=shift.name, schedule_name='new') }}">
+        Create New Schedule
+        </a>
+    </p>
 {% endblock %}

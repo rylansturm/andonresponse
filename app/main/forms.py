@@ -47,6 +47,7 @@ class AssignShiftForm(FlaskForm):
 class CreateKPIForm(FlaskForm):
     demand = IntegerField('Demand (good parts)', validators=[DataRequired()])
     pct = IntegerField('Planned Cycle Time (seconds)', validators=[DataRequired()])
+    schedule = SelectField('Schedule', validators=[DataRequired()])
     shift = SelectField('Shift', validators=[DataRequired()])
     date = DateField('Date (at end of shift)', validators=[DataRequired()])
     area = StringField('Area', validators=[DataRequired()])

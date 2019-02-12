@@ -1,7 +1,8 @@
 from time import time
 import jwt
 from app import db, login
-from functions.dates import time_from_string as tfs, get_available_time as gat
+import datetime
+from functions.dates import time_from_string as tfs, get_available_time as gat, datetime_from_time as dft
 from werkzeug.security import generate_password_hash, check_password_hash
 from flask_login import UserMixin
 from flask import current_app
@@ -106,6 +107,7 @@ class KPI(db.Model):
     id_user = db.Column(db.Integer, db.ForeignKey('user.id'))
     id_area = db.Column(db.Integer, db.ForeignKey('area.id'))
     id_shift = db.Column(db.Integer, db.ForeignKey('shift.id'))
+    id_schedule = db.Column(db.Integer, db.ForeignKey('schedule.id'))
     d = db.Column(db.Date, index=True)
     demand = db.Column(db.Integer)
     plan_cycle_time = db.Column(db.Integer)
@@ -127,6 +129,10 @@ class KPI(db.Model):
 
     def add_user(self, user):
         self.user = user
+
+    def add_schedule(self, schedule):
+        self.id_schedule = Schedule.query.filter_by(name=schedule, id_area=self.id_area,
+                                                    id_shift=self.id_shift).first().id
 
 
 class Area(db.Model):
@@ -232,6 +238,7 @@ class Schedule(db.Model):
     end2 = db.Column(db.Time)
     end3 = db.Column(db.Time)
     end4 = db.Column(db.Time)
+    kpi = db.relationship('KPI', backref='schedule', lazy='dynamic')
 
     def __repr__(self):
         return '<{} {} {} Schedule>'.format(self.schedule_area.name, self.schedule_shift.name, self.name)
@@ -240,12 +247,28 @@ class Schedule(db.Model):
         return [self.start1, self.end1, self.start2, self.end2,
                 self.start3, self.end3, self.start4, self.end4]
 
+    def return_datetime_list(self, kpi_d: datetime.date):
+        times = self.return_times_list()
+        new_times = []
+        for i in range(start=len(times)-1, stop=-1, step=-1):
+            time = times[i]
+            if type(time) == datetime.time:
+                if i < len(times) - 1:
+                    if time < times[i+1]:
+                        new_time = dft(time, kpi_d)
+                    else:
+                        new_time = dft(time, kpi_d - datetime.timedelta(1))
+                else:
+                    new_time = dft(time, kpi_d)
+                new_times.insert(0, new_time)
+        return new_times
+
     def make_times_list(self, **kwargs):
         for key, value in kwargs.items():
             exec("self.{} = tfs('{}')".format(key, value))
 
     def get_available_time(self):
-        return gat(self.return_times_list())
+        return int(gat(self.return_times_list()).total_seconds())
 
     def add_area(self, area):
         self.schedule_area = area

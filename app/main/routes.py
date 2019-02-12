@@ -146,10 +146,13 @@ def config_schedule(area_name, shift_name, schedule_name):
     shift = Shift.query.filter_by(name=shift_name).first()
     form = CreateScheduleForm(original_name=schedule_name, area=area, shift=shift)
     if form.validate_on_submit():
-        s = Schedule(name=form.name.data)
-        db.session.add(s)
-        s.add_area(area)
-        s.add_shift(shift)
+        s = Schedule.query.filter_by(name=schedule_name).first()
+        if not s:
+            s = Schedule(name=form.name.data)
+            db.session.add(s)
+            s.add_area(area)
+            s.add_shift(shift)
+        s.name = form.name.data
         s.make_times_list(start1=form.start1.data, start2=form.start2.data, start3=form.start3.data,
                           start4=form.start4.data, end1=form.end1.data, end2=form.end2.data,
                           end3=form.end3.data, end4=form.end4.data)
@@ -159,20 +162,19 @@ def config_schedule(area_name, shift_name, schedule_name):
     elif request.method == 'GET':
         if schedule_name != 'new':
             s = Schedule.query.filter_by(name=schedule_name, id_area=area.id, id_shift=shift.id).first()
-            form.name.data = s.name
-            form.start1.data = sft(s.start1)
-            form.start2.data = sft(s.start2)
-            form.start3.data = sft(s.start3)
-            form.start4.data = sft(s.start4)
-            form.end1.data = sft(s.end1)
-            form.end2.data = sft(s.end2)
-            form.end3.data = sft(s.end3)
-            form.end4.data = sft(s.end4)
+            if s:
+                form.name.data = s.name
+                form.start1.data = s.start1
+                form.start2.data = s.start2
+                form.start3.data = s.start3
+                form.start4.data = s.start4
+                form.end1.data = s.end1
+                form.end2.data = s.end2
+                form.end3.data = s.end3
+                form.end4.data = s.end4
     return render_template(tempdir + 'config_schedule.html', area=area, shift=shift, form=form)
 
 
-# TODO: area_schedules to display currently available schedules and info about each (use sub-template)
-# TODO: schedule_edit as form to change the schedule information
 @bp.route('/area/<area_name>/schedules/<shift_name>', methods=['GET', 'POST'])
 @login_required
 def area_schedules(area_name, shift_name):
@@ -186,18 +188,24 @@ def area_schedules(area_name, shift_name):
 @login_required
 def create_kpi(area_name, shift, date):
     form = CreateKPIForm(current_user)
+    a = Area.query.filter_by(name=area_name).first()
+    s = Shift.query.filter_by(name=shift).first()
     form.shift.choices = [(s.name, s.name) for s in Shift.query.all()]
+    form.schedule.choices = [(s.name, s.name) for s in Schedule.query.filter_by(id_area=a.id,
+                                                                                id_shift=s.id).all()]
     if form.validate_on_submit():
         d = form.date.data
         demand = form.demand.data
         pct = form.pct.data
         area = form.area.data
+        schedule = form.schedule.data
         shift = form.shift.data
         user = current_user
         k = KPI(d=d, demand=demand, plan_cycle_time=pct)
         k.add_area(area)
         k.add_user(user)
         k.add_shift(shift)
+        k.add_schedule(schedule)
         db.session.add(k)
         db.session.commit()
         flash('Your changes have been saved')

@@ -25,7 +25,11 @@
         <tbody>
         {% for shift in area.shifts %}
             <tr>
-                <th scope="row">{{ shift.name }}</th>
+                <th scope="row">
+                    <a href="{{ url_for('main.area_schedules', area_name=area.name, shift_name=shift.name) }}">
+                        {{ shift.name }}
+                    </a>
+                </th>
                 {% for day in week.get_dates_list() %}
                     {% if area.kpi.filter(KPI.d==day, KPI.shift==shift).first() %}
                     <td>

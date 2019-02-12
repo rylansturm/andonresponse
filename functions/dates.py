@@ -90,7 +90,7 @@ def datetime_from_string(time):
         return time
 
 
-def datetime_from_time(time: datetime.time, date: datetime.date=datetime.date.today()):
+def datetime_from_time(time: datetime.time, date: datetime.date = datetime.date.today()):
     """ returns a datetime.datetime object with today's date, given a datetime.time object """
     if type(time) == datetime.time:
         return datetime.datetime.combine(date, time)
