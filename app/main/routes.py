@@ -1,11 +1,11 @@
 from flask import render_template, flash, redirect, url_for, request
 from app import db
-from app.main.forms import EditProfileForm, CreateKPI, CreateAreaForm, \
-    CreateShift, AssignAreaForm, AssignShiftForm
+from app.main.forms import EditProfileForm, CreateKPIForm, CreateAreaForm, \
+    CreateShiftForm, AssignAreaForm, AssignShiftForm, CreateScheduleForm
 from flask_login import current_user, login_required
-from app.models import User, Area, KPI, Shift
+from app.models import User, Area, KPI, Shift, Schedule
 from app.main import bp
-from functions.dates import Week, date_from_string
+from functions.dates import Week, date_from_string, string_from_time as sft
 from functions.text import convert_text_area_to_list as conv
 import datetime
 
@@ -139,19 +139,53 @@ def area_date(area_name, date):
         return render_template(tempdir + 'area_browse.html', areas=areas, week=week, user=current_user)
 
 
+@bp.route('/area/<area_name>/schedules/<shift_name>/<schedule_name>', methods=['GET', 'POST'])
+@login_required
+def config_schedule(area_name, shift_name, schedule_name):
+    area = Area.query.filter_by(name=area_name).first()
+    shift = Shift.query.filter_by(name=shift_name).first()
+    form = CreateScheduleForm(original_name=schedule_name, area=area, shift=shift)
+    if form.validate_on_submit():
+        s = Schedule(name=form.name.data)
+        db.session.add(s)
+        s.add_area(area)
+        s.add_shift(shift)
+        s.make_times_list(start1=form.start1.data, start2=form.start2.data, start3=form.start3.data,
+                          start4=form.start4.data, end1=form.end1.data, end2=form.end2.data,
+                          end3=form.end3.data, end4=form.end4.data)
+        db.session.commit()
+        flash('Successfully added {} shift for {} {}'.format(form.name.data, area.name, shift.name))
+        return redirect(url_for('main.area_schedules', area_name=area_name, shift_name=shift_name))
+    elif request.method == 'GET':
+        if schedule_name != 'new':
+            s = Schedule.query.filter_by(name=schedule_name, id_area=area.id, id_shift=shift.id).first()
+            form.name.data = s.name
+            form.start1.data = sft(s.start1)
+            form.start2.data = sft(s.start2)
+            form.start3.data = sft(s.start3)
+            form.start4.data = sft(s.start4)
+            form.end1.data = sft(s.end1)
+            form.end2.data = sft(s.end2)
+            form.end3.data = sft(s.end3)
+            form.end4.data = sft(s.end4)
+    return render_template(tempdir + 'config_schedule.html', area=area, shift=shift, form=form)
+
+
 # TODO: area_schedules to display currently available schedules and info about each (use sub-template)
 # TODO: schedule_edit as form to change the schedule information
-@bp.route('/area/<area_name>/schedules', methods=['GET', 'POST'])
+@bp.route('/area/<area_name>/schedules/<shift_name>', methods=['GET', 'POST'])
 @login_required
-def area_schedules(area_name):
+def area_schedules(area_name, shift_name):
     area = Area.query.filter_by(name=area_name).first()
-    return render_template(tempdir + 'area_schedules.html', area=area)
+    shift = Shift.query.filter_by(name=shift_name).first()
+    schedules = Schedule.query.filter_by(schedule_area=area, schedule_shift=shift).all()
+    return render_template(tempdir + 'area_schedules.html', area=area, shift=shift, schedules=schedules)
 
 
 @bp.route('/area/<area_name>/edit/kpi/<shift>/<date>', methods=['GET', 'POST'])
 @login_required
 def create_kpi(area_name, shift, date):
-    form = CreateKPI(current_user)
+    form = CreateKPIForm(current_user)
     form.shift.choices = [(s.name, s.name) for s in Shift.query.all()]
     if form.validate_on_submit():
         d = form.date.data
@@ -185,7 +219,7 @@ def create_kpi(area_name, shift, date):
 @bp.route('/create_shift', methods=['GET', 'POST'])
 @login_required
 def create_shift():
-    form = CreateShift()
+    form = CreateShiftForm()
     if form.validate_on_submit():
         name = form.name.data
         start = form.start.data

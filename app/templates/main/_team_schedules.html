@@ -1,0 +1,12 @@
+    <table class="table table-hover">
+        <tr>
+            <td width="70px">
+            </td>
+            <td>
+                <a href="{{ url_for('main.config_schedule', area_name=area.name,
+                shift_name=shift.name, schedule_name=schedule.name) }}">
+                    {{ schedule.name }}
+                </a>
+            </td>
+        </tr>
+    </table>

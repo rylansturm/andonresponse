@@ -134,7 +134,7 @@ class Area(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(24), unique=True)
     kpi = db.relationship('KPI', backref='area', lazy='dynamic')
-    schedule = db.relationship('Schedule', backref='schedule_area', lazy='dynamic')
+    schedules = db.relationship('Schedule', backref='schedule_area', lazy='dynamic')
     users = db.relationship(
         'User', secondary=user_area,
         primaryjoin=(user_area.c.id_area == id),
@@ -246,6 +246,13 @@ class Schedule(db.Model):
 
     def get_available_time(self):
         return gat(self.return_times_list())
+
+    def add_area(self, area):
+        self.schedule_area = area
+
+    def add_shift(self, shift):
+        self.schedule_shift = shift
+
 
 # TODO: Cycle Class
 # TODO: Andon Class

@@ -2,7 +2,7 @@ from flask_wtf import FlaskForm
 from wtforms import StringField, SubmitField, IntegerField, SelectField, TextAreaField
 from wtforms.fields.html5 import DateField, TimeField
 from wtforms.validators import DataRequired, ValidationError
-from app.models import Area, Shift, User
+from app.models import Area, Shift, User, Schedule
 
 
 class EditProfileForm(FlaskForm):
@@ -44,7 +44,7 @@ class AssignShiftForm(FlaskForm):
     submit2 = SubmitField('Submit')
 
 
-class CreateKPI(FlaskForm):
+class CreateKPIForm(FlaskForm):
     demand = IntegerField('Demand (good parts)', validators=[DataRequired()])
     pct = IntegerField('Planned Cycle Time (seconds)', validators=[DataRequired()])
     shift = SelectField('Shift', validators=[DataRequired()])
@@ -53,7 +53,7 @@ class CreateKPI(FlaskForm):
     submit = SubmitField('Create')
 
     def __init__(self, user_name, *args, **kwargs):
-        super(CreateKPI, self).__init__(*args, **kwargs)
+        super(CreateKPIForm, self).__init__(*args, **kwargs)
         self.user = user_name
 
     def validate_area(self, area):
@@ -62,7 +62,7 @@ class CreateKPI(FlaskForm):
             raise ValidationError('You are not assigned to this area')
 
 
-class CreateShift(FlaskForm):
+class CreateShiftForm(FlaskForm):
     name = StringField('Name', validators=[DataRequired()])
     start = TimeField('Start Time', validators=[DataRequired()])
     end = TimeField('End Time', validators=[DataRequired()])
@@ -80,3 +80,29 @@ class CreateShift(FlaskForm):
     def validate_end(self, end):
         if self.start.data == end.data:
             raise ValidationError('These times are the same')
+
+
+class CreateScheduleForm(FlaskForm):
+    name = StringField('Name', validators=[DataRequired()])
+    start1 = TimeField('First Block Start', validators=[DataRequired()])
+    end1 = TimeField('First Block End', validators=[DataRequired()])
+    start2 = TimeField('Second Block Start')
+    end2 = TimeField('Second Block End')
+    start3 = TimeField('Third Block Start')
+    end3 = TimeField('Third Block End')
+    start4 = TimeField('Fourth Block Start')
+    end4 = TimeField('Fourth Block End')
+    submit = SubmitField('Submit')
+
+    def __init__(self, original_name, area, shift, *args, **kwargs):
+        super(CreateScheduleForm, self).__init__(*args, **kwargs)
+        self.original_name = original_name
+        self.area = area
+        self.shift = shift
+
+    def validate_name(self, name):
+        schedules = [s.name for s in Schedule.query.filter_by(id_area=self.area.id, id_shift=self.shift.id).all()]
+        if name.data != self.original_name and name.data in schedules:
+            raise ValidationError('This name exists for this team already')
+        if len(name.data) > 24:
+            raise ValidationError('Schedule name must be shorter than 24 characters')

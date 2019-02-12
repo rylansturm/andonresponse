@@ -98,6 +98,11 @@ def datetime_from_time(time: datetime.time, date: datetime.date=datetime.date.to
         return time
 
 
+def string_from_time(time: datetime.time):
+    """ returns a string of format %I:%M %p from a datetime.time object """
+    return time.strftime('%I:%M %p')
+
+
 def get_available_time(times: list):
     """ given a list of datetime.time or datetime.datetime objects, return the available time (datetime.timedelta).
      list passed must be all of the plan times in order, alternating between start and stop times"""
