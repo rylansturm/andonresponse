@@ -5,7 +5,9 @@ import datetime
 from functions.dates import time_from_string as tfs, get_available_time as gat, datetime_from_time as dft
 from werkzeug.security import generate_password_hash, check_password_hash
 from flask_login import UserMixin
-from flask import current_app
+from flask import current_app, url_for
+import base64
+import os
 
 
 """
@@ -38,6 +40,8 @@ class User(UserMixin, db.Model):  # TODO: make admin and superadmin columns (or 
     username = db.Column(db.String(64), index=True, unique=True)
     email = db.Column(db.String(120), index=True, unique=True)
     password_hash = db.Column(db.String(128))
+    token = db.Column(db.String(32), index=True, unique=True)
+    token_expiration = db.Column(db.DateTime)
     kpi = db.relationship('KPI', backref='planner', lazy='dynamic')
     areas = db.relationship(
         'Area', secondary=user_area,
@@ -95,6 +99,46 @@ class User(UserMixin, db.Model):  # TODO: make admin and superadmin columns (or 
             return
         return User.query.get(id)
 
+    def to_dict(self, include_email=False):
+        data = {
+            'id': self.id,
+            'username': self.username,
+            'areas': [a.name for a in self.areas.all()],
+            'shifts': [s.name for s in self.shifts.all()],
+            '_links': {
+                'self': url_for('api.get_user', id=self.id)
+            }
+        }
+        if include_email:
+            data['email'] = self.email
+        return data
+
+    def from_dict(self, data, new_user=False):
+        for field in ['username', 'email', 'about_me']:
+            if field in data:
+                setattr(self, field, data[field])
+        if new_user and 'password' in data:
+            self.set_password(data['password'])
+
+    def get_token(self, expires_in=3600):
+        now = datetime.datetime.utcnow()
+        if self.token and self.token_expiration > now + datetime.timedelta(seconds=60):
+            return self.token
+        self.token = base64.b64encode(os.urandom(24)).decode('utf-8')
+        self.token_expiration = now + datetime.timedelta(seconds=expires_in)
+        db.session.add(self)
+        return self.token
+
+    def revoke_token(self):
+        self.token_expiration = datetime.datetime.utcnow() - datetime.timedelta(seconds=1)
+
+    @staticmethod
+    def check_token(token):
+        user = User.query.filter_by(token=token).first()
+        if user is None or user.token_expiration < datetime.datetime.utcnow():
+            return None
+        return user
+
 
 @login.user_loader
 def load_user(id):
@@ -103,6 +147,7 @@ def load_user(id):
 
 class KPI(db.Model):
     """ shift plans. organized by shift and date, contains schedule, demand, pct """
+    __tablename__ = 'kpi'
     id = db.Column(db.Integer, primary_key=True)
     id_user = db.Column(db.Integer, db.ForeignKey('user.id'))
     id_area = db.Column(db.Integer, db.ForeignKey('area.id'))
@@ -111,9 +156,10 @@ class KPI(db.Model):
     d = db.Column(db.Date, index=True)
     demand = db.Column(db.Integer)
     plan_cycle_time = db.Column(db.Integer)
+    cycles = db.relationship('Cycle', backref='kpi', lazy='dynamic')
 
     def __repr__(self):
-        return '<KPI for {} {}>'.format(self.d, self.area.name)
+        return '<KPI for {} {} {}>'.format(self.d, self.area.name, self.shift.name)
 
     def return_details(self):
         return 'area={}' \
@@ -128,7 +174,7 @@ class KPI(db.Model):
         self.id_shift = Shift.query.filter_by(name=shift).first().id
 
     def add_user(self, user):
-        self.user = user
+        self.planner = user
 
     def add_schedule(self, schedule):
         self.id_schedule = Schedule.query.filter_by(name=schedule, id_area=self.id_area,
@@ -247,10 +293,10 @@ class Schedule(db.Model):
         return [self.start1, self.end1, self.start2, self.end2,
                 self.start3, self.end3, self.start4, self.end4]
 
-    def return_datetime_list(self, kpi_d: datetime.date):
+    def return_schedule(self, kpi_d: datetime.date = datetime.date.today()):
         times = self.return_times_list()
         new_times = []
-        for i in range(start=len(times)-1, stop=-1, step=-1):
+        for i in range(len(times)-1, -1, -1):
             time = times[i]
             if type(time) == datetime.time:
                 if i < len(times) - 1:
@@ -277,7 +323,18 @@ class Schedule(db.Model):
         self.schedule_shift = shift
 
 
-# TODO: Cycle Class
+class Cycle(db.Model):
+    """ Each cycle from the operator is logged in this format """
+    id = db.Column(db.Integer, primary_key=True)
+    id_kpi = db.Column(db.Integer, db.ForeignKey('kpi.id'))
+    d = db.Column(db.DateTime)
+    sequence = db.Column(db.Integer)
+    cycle_time = db.Column(db.Integer)
+    parts_per = db.Column(db.Integer)
+    delivered = db.Column(db.Integer)
+    code = db.Column(db.Integer)       # early (0), on time (1), late (2)
+
+
 # TODO: Andon Class
 # TODO: Process Class
 # TODO: Operator Class

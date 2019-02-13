@@ -30,7 +30,7 @@ class CreateAreaForm(FlaskForm):
         self.original_name = original_name
 
     def validate_name(self, name):
-        if not self.original_name and name.data in [a.name for a in Area.query.all()]:
+        if not self.original_name and name.data.capitalize() in [a.name for a in Area.query.all()]:
             raise ValidationError('This name already exists')
 
 
