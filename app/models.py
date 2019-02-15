@@ -334,6 +334,23 @@ class Cycle(db.Model):
     delivered = db.Column(db.Integer)
     code = db.Column(db.Integer)       # early (0), on time (1), late (2)
 
+    def from_dict(self, data):
+        for field in ['d', 'sequence', 'cycle_time', 'parts_per', 'delivered', 'code']:
+            if field in data:
+                setattr(self, field, data[field])
+
+    def to_dict(self):
+        data = {
+            'id': self.id,
+            'd': self.d,
+            'sequence': self.sequence,
+            'cycle_time': self.cycle_time,
+            'parts_per': self.parts_per,
+            'delivered': self.delivered,
+            'code': self.code
+        }
+        return data
+
 
 # TODO: Andon Class
 # TODO: Process Class

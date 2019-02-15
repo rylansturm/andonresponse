@@ -83,7 +83,10 @@ def datetime_from_string(time):
         if type(time) == datetime.datetime:
             return time
         else:
-            return datetime.datetime.strptime(time, '%Y-%m-%d %H:%M:%S')
+            try:
+                return datetime.datetime.strptime(time, '%Y-%m-%d %H:%M:%S')
+            except ValueError:
+                return datetime.datetime.strptime(time, '%Y-%m-%d %H:%M:%S.%f')
     except ValueError:
         return time
     except TypeError:
