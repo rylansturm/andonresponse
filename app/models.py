@@ -355,7 +355,7 @@ class Cycle(db.Model):
     code = db.Column(db.Integer)       # early (0), on time (1), late (2)
 
     def from_dict(self, data):
-        for field in ['d', 'sequence', 'cycle_time', 'parts_per', 'delivered', 'code']:
+        for field in ['id_kpi', 'd', 'sequence', 'cycle_time', 'parts_per', 'delivered', 'code']:
             if field in data:
                 setattr(self, field, data[field])
 
@@ -371,6 +371,28 @@ class Cycle(db.Model):
         }
         return data
 
+
+class Andon(db.Model):
+    """ Keeps track of the number of andons (and possibly type of andon in the future?) """
+    id = db.Column(db.Integer, primary_key=True)
+    id_kpi = db.Column(db.Integer, db.ForeignKey('kpi.id'))
+    d = db.Column(db.DateTime)
+    sequence = db.Column(db.Integer)
+    responded = db.Column(db.Boolean)
+
+    def from_dict(self, data):
+        for field in ['d', 'sequence', 'responded']:
+            if field in data:
+                setattr(self, field, data[field])
+
+    def to_dict(self):
+        data = {
+            'id': self.id,
+            'd': self.d,
+            'sequence': self.sequence,
+            'responded': self.responded
+        }
+        return data
 
 # TODO: Andon Class
 # TODO: Process Class
