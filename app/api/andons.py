@@ -8,6 +8,7 @@ from app import db
 def create_andon():
     data = request.get_json() or {}
     andon = Andon()
+    data['responded'] = int(data['responded'])
     andon.from_dict(data)
     db.session.add(andon)
     db.session.commit()
