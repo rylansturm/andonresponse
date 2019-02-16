@@ -2,7 +2,10 @@ from time import time
 import jwt
 from app import db, login
 import datetime
-from functions.dates import time_from_string as tfs, get_available_time as gat, datetime_from_time as dft
+from functions.dates import time_from_string as tfs, \
+    get_available_time as gat, \
+    datetime_from_time as dft, \
+    date_from_string as dfs
 from werkzeug.security import generate_password_hash, check_password_hash
 from flask_login import UserMixin
 from flask import current_app, url_for
@@ -179,6 +182,23 @@ class KPI(db.Model):
     def add_schedule(self, schedule):
         self.id_schedule = Schedule.query.filter_by(name=schedule, id_area=self.id_area,
                                                     id_shift=self.id_shift).first().id
+
+    def to_dict(self):
+        data = {
+            'id': self.id,
+            'area': self.area.name if self.area else None,
+            'shift': self.shift.name if self.shift else None,
+            'schedule': self.schedule.name if self.schedule else None,
+            'd': self.d,
+            'demand': self.demand,
+            'plan_cycle_time': self.plan_cycle_time
+        }
+        return data
+
+    def from_dict(self, data):
+        for field in ['area', 'shift', 'schedule', 'd', 'demand', 'plan_cycle_time']:
+            if field in data:
+                setattr(self, field, data[field])
 
 
 class Area(db.Model):
