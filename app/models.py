@@ -189,7 +189,7 @@ class KPI(db.Model):
             'area': self.area.name if self.area else None,
             'shift': self.shift.name if self.shift else None,
             'schedule': self.schedule.name if self.schedule else None,
-            'd': self.d,
+            'd': str(self.d),
             'demand': self.demand,
             'plan_cycle_time': self.plan_cycle_time
         }
