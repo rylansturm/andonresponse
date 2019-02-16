@@ -381,13 +381,14 @@ class Andon(db.Model):
     responded = db.Column(db.Boolean)
 
     def from_dict(self, data):
-        for field in ['d', 'sequence', 'responded']:
+        for field in ['id_kpi', 'd', 'sequence', 'responded']:
             if field in data:
                 setattr(self, field, data[field])
 
     def to_dict(self):
         data = {
             'id': self.id,
+            'id_kpi': self.id_kpi,
             'd': self.d,
             'sequence': self.sequence,
             'responded': self.responded
