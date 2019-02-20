@@ -49,9 +49,50 @@
 {% endblock %}
 
 {% block scripts %}
+    {{ super() }}
+    {{ moment.include_moment() }}
     <script>
-        $('#shift').change(function(event) {
-            $('#update').html('This is ' + $('#shift').val() + ' and other info');
+        $(function () {
+            var timer = null;
+            var xhr = null;
+            $('.kpi_popup').hover(
+                function(event) {
+                    // mouse in event handler
+                    var elem = $(event.currentTarget);
+                    timer = setTimeout(function() {
+                        timer = null;
+                        xhr = $.ajax(
+                            '/kpi/' + elem.first().get(0).id + '/popup').done(
+                                function(data) {
+                                    xhr = null;
+                                    elem.popover({
+                                        trigger: 'manual',
+                                        html: true,
+                                        animation: false,
+                                        container: elem,
+                                        content: data
+                                    }).popover('show');
+                                    flask_moment_render_all();
+                                }
+                            );
+                    }, 1000);
+                },
+                function(event) {
+                    // mouse out event handler
+                    var elem = $(event.currentTarget);
+                    if (timer) {
+                        clearTimeout(timer);
+                        timer = null;
+                    }
+                    else if (xhr) {
+                        xhr.abort();
+                        xhr = null;
+                    }
+                    else {
+                        elem.popover('destroy');
+                    }
+                }
+            );
         });
     </script>
 {% endblock %}

@@ -3,7 +3,7 @@ from app import db
 from app.main.forms import EditProfileForm, CreateKPIForm, CreateAreaForm, \
     CreateShiftForm, AssignAreaForm, AssignShiftForm, CreateScheduleForm
 from flask_login import current_user, login_required
-from app.models import User, Area, KPI, Shift, Schedule
+from app.models import User, Area, KPI, Shift, Schedule, Cycle, Andon
 from app.main import bp
 from functions.dates import Week, date_from_string, string_from_time as sft
 from functions.text import convert_text_area_to_list as conv
@@ -184,7 +184,22 @@ def area_schedules(area_name, shift_name):
     return render_template(tempdir + 'area_schedules.html', area=area, shift=shift, schedules=schedules)
 
 
-@bp.route('/area/<area_name>/edit/kpi/<shift>/<date>', methods=['GET', 'POST'])
+@bp.route('/kpi/<kpi_id>/popup', methods=['GET'])
+@login_required
+def kpi_popup(kpi_id):
+    kpi = KPI.query.get(kpi_id)
+    return render_template(tempdir + 'kpi_popup.html', kpi=kpi)
+
+
+@bp.route('/kpi/<kpi_id>/overview', methods=['GET'])
+@login_required
+def kpi_overview(kpi_id):
+    kpi = KPI.query.get(kpi_id)
+    sequences = kpi.get_sequences()
+    return render_template(tempdir + 'kpi_overview.html', kpi=kpi, sequences=sequences, Cycle=Cycle, Andon=Andon)
+
+
+@bp.route('/kpi/<area_name>/<shift>/<date>/edit', methods=['GET', 'POST'])
 @login_required
 def create_kpi(area_name, shift, date):
     form = CreateKPIForm(current_user)

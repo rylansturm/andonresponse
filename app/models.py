@@ -160,6 +160,7 @@ class KPI(db.Model):
     demand = db.Column(db.Integer)
     plan_cycle_time = db.Column(db.Integer)
     cycles = db.relationship('Cycle', backref='kpi', lazy='dynamic')
+    andons = db.relationship('Andon', backref='kpi', lazy='dynamic')
 
     def __repr__(self):
         return '<KPI for {} {} {}>'.format(self.d, self.area.name, self.shift.name)
@@ -183,6 +184,27 @@ class KPI(db.Model):
         self.id_schedule = Schedule.query.filter_by(name=schedule, id_area=self.id_area,
                                                     id_shift=self.id_shift).first().id
 
+    def get_time_elapsed(self, d=datetime.datetime.now()):
+        sched = self.schedule.return_schedule(self.d)
+        now = datetime.datetime.now()
+        if d > sched[-1]:
+            return datetime.timedelta(seconds=self.schedule.get_available_time())
+        elif d < sched[0]:
+            return datetime.timedelta(seconds=0)
+        else:
+            t = now - sched[0]
+            for item in sched:
+                index = sched.index(item)
+                if now > item and index % 2 != 0:
+                    if now > sched[index+1]:
+                        t -= sched[index+1] - item
+                    else:
+                        t -= now - item
+            return t
+
+    def get_sequences(self):
+        return list(set([c.sequence for c in self.cycles.all()]))
+
     def to_dict(self):
         data = {
             'id': self.id,
@@ -199,6 +221,14 @@ class KPI(db.Model):
         for field in ['area', 'shift', 'schedule', 'd', 'demand', 'plan_cycle_time']:
             if field in data:
                 setattr(self, field, data[field])
+
+    @staticmethod
+    def get_kpi(area, shift, date):
+        a = Area.query.filter_by(name=area).first()
+        s = Shift.query.filter_by(name=shift).first()
+        d = dfs(date)
+        kpi = KPI.query.filter_by(area=a, shift=s, d=d).first()
+        return kpi
 
 
 class Area(db.Model):
@@ -395,6 +425,5 @@ class Andon(db.Model):
         }
         return data
 
-# TODO: Andon Class
 # TODO: Process Class
 # TODO: Operator Class

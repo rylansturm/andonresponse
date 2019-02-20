@@ -33,9 +33,12 @@
                 {% for day in week.get_dates_list() %}
                     {% if area.kpi.filter(KPI.d==day, KPI.shift==shift).first() %}
                     <td>
-                        <a href="{{ url_for('main.create_kpi', area_name=area.name, shift=shift.name, date=day) }}">
+                        <span class="kpi_popup" id="{{ area.kpi.filter(KPI.d==day, KPI.shift==shift).first().id }}">
+                            <a href="{{ url_for('main.kpi_overview',
+                            kpi_id=area.kpi.filter(KPI.d==day, KPI.shift==shift).first().id) }}">
                                 {{ area.kpi.filter(KPI.d==day, KPI.shift==shift).first().demand }}
-                        </a>
+                            </a>
+                        </span>
                     </td>
                     {% else %}
                     <td>

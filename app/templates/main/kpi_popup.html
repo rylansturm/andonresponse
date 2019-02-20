@@ -1,0 +1,19 @@
+<table class="table">
+    <tr>
+        <td style="border: 0px;">
+            <p>
+                {{ kpi }}
+                <a href="{{ url_for('main.create_kpi', area_name=kpi.area.name, shift=kpi.shift.name, date=kpi.d) }}">
+                    Edit
+                </a>
+            </p>
+            <small>
+                <meter min="0" max="{{ kpi.schedule.get_available_time() }}"
+                       value="kpi.get_time_elapsed().total_seconds()">Time Elapsed</meter>
+                <p>Demand: {{ kpi.demand }}</p>
+                <p>Planned Cycle Time: {{ kpi.plan_cycle_time }}</p>
+                <p>Andons: {{ kpi.andons.count() }}</p>
+            </small>
+        </td>
+    </tr>
+</table>
