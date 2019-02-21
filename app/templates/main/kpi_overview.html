@@ -8,6 +8,7 @@
     </table>
     <hr>
     <table class="table table-striped table-bordered">
+        Full Shift
         <thead>
         <tr>
             <th scope="col">Sequence</th>
@@ -27,26 +28,28 @@
                 <td>
                     {{ kpi.cycles.filter(Cycle.sequence==sequence, Cycle.code==0).count() }} /
                     {{ kpi.cycles.filter(Cycle.sequence==sequence).count() }}
-                    ({{ (kpi.cycles.filter(Cycle.sequence==sequence, Cycle.code==0).count() /
-                        kpi.cycles.filter(Cycle.sequence==sequence).count() * 100)|int}}%)
+                    <p><b>({{ (kpi.cycles.filter(Cycle.sequence==sequence, Cycle.code==0).count() /
+                        kpi.cycles.filter(Cycle.sequence==sequence).count() * 100)|int}}%)</b></p>
                 </td>
                 <td>
                     {{ kpi.cycles.filter(Cycle.sequence==sequence, Cycle.code==1).count() }} /
                     {{ kpi.cycles.filter(Cycle.sequence==sequence).count() }}
-                    ({{ (kpi.cycles.filter(Cycle.sequence==sequence, Cycle.code==1).count() /
-                        kpi.cycles.filter(Cycle.sequence==sequence).count() * 100)|int}}%)
+                    <p><b>({{ (kpi.cycles.filter(Cycle.sequence==sequence, Cycle.code==1).count() /
+                        kpi.cycles.filter(Cycle.sequence==sequence).count() * 100)|int}}%)</b></p>
                 </td>
                 <td>
                     {{ kpi.cycles.filter(Cycle.sequence==sequence, Cycle.code==2).count() }} /
                     {{ kpi.cycles.filter(Cycle.sequence==sequence).count() }}
-                    ({{ (kpi.cycles.filter(Cycle.sequence==sequence, Cycle.code==2).count() /
-                        kpi.cycles.filter(Cycle.sequence==sequence).count() * 100)|int}}%)
+                    <p><b>({{ (kpi.cycles.filter(Cycle.sequence==sequence, Cycle.code==2).count() /
+                        kpi.cycles.filter(Cycle.sequence==sequence).count() * 100)|int}}%)</b></p>
                 </td>
                 <td>
                     <meter min="0" max="{{ kpi.demand }}"
                            value="{{ kpi.cycles.filter(Cycle.sequence==sequence).order_by(
                            Cycle.d.desc()).first().delivered }}"></meter>
-                    {{ kpi.cycles.filter(Cycle.sequence==sequence).order_by(Cycle.d.desc()).first().delivered }}
+                    <p><b>
+                        {{ kpi.cycles.filter(Cycle.sequence==sequence).order_by(Cycle.d.desc()).first().delivered }}
+                    </b></p>
                 </td>
                 <td>
                     {{ kpi.andons.filter(Andon.sequence==sequence).count() }}
@@ -55,4 +58,94 @@
         {% endfor %}
         </tbody>
     </table>
+    {% for block in blocks %}
+    <table class="table table-striped table-bordered">
+        Block {{ block }}
+        <thead>
+        <tr>
+            <th scope="col">Sequence</th>
+            <th scope="col">Early Cycle Count</th>
+            <th scope="col">Target Cycle Count</th>
+            <th scope="col">Late Cycle Count</th>
+            <th scope="col">Parts Delivered</th>
+            <th scope="col">Andons</th>
+        </tr>
+        </thead>
+        <tbody>
+        {% for sequence in sequences %}
+            <tr>
+                <th scope="row">
+                    <p>Sequence {{ sequence }}</p>
+                </th>
+                <td>
+                    {{ kpi.cycles.filter(Cycle.sequence==sequence, Cycle.code==0,
+                        Cycle.d > schedule[block*2-2],
+                        Cycle.d < schedule[block*2-1]).count() }} /
+                    {{ kpi.cycles.filter(Cycle.sequence==sequence,
+                        Cycle.d > schedule[block*2-2],
+                        Cycle.d < schedule[block*2-1]).count() }}
+                    {% if kpi.cycles.filter(Cycle.sequence==sequence,
+                        Cycle.d > schedule[block*2-2],
+                        Cycle.d < schedule[block*2-1]).count() %}
+                    <p><b>({{ (kpi.cycles.filter(Cycle.sequence==sequence, Cycle.code==0,
+                            Cycle.d > schedule[block*2-2],
+                            Cycle.d < schedule[block*2-1]).count() /
+                        kpi.cycles.filter(Cycle.sequence==sequence,
+                            Cycle.d > schedule[block*2-2],
+                            Cycle.d < schedule[block*2-1]).count() * 100)|int}}%)</b></p>
+                    {% endif %}
+                </td>
+                <td>
+                    {{ kpi.cycles.filter(Cycle.sequence==sequence, Cycle.code==1,
+                        Cycle.d > schedule[block*2-2],
+                        Cycle.d < schedule[block*2-1]).count() }} /
+                    {{ kpi.cycles.filter(Cycle.sequence==sequence,
+                        Cycle.d > schedule[block*2-2],
+                        Cycle.d < schedule[block*2-1]).count() }}
+                    {% if kpi.cycles.filter(Cycle.sequence==sequence,
+                        Cycle.d > schedule[block*2-2],
+                        Cycle.d < schedule[block*2-1]).count() %}
+                    <p><b>({{ (kpi.cycles.filter(Cycle.sequence==sequence, Cycle.code==1,
+                            Cycle.d > schedule[block*2-2],
+                            Cycle.d < schedule[block*2-1]).count() /
+                        kpi.cycles.filter(Cycle.sequence==sequence,
+                            Cycle.d > schedule[block*2-2],
+                            Cycle.d < schedule[block*2-1]).count() * 100)|int}}%)</b></p>
+                    {% endif %}
+                </td>
+                <td>
+                    {{ kpi.cycles.filter(Cycle.sequence==sequence, Cycle.code==2,
+                        Cycle.d > schedule[block*2-2],
+                        Cycle.d < schedule[block*2-1]).count() }} /
+                    {{ kpi.cycles.filter(Cycle.sequence==sequence,
+                        Cycle.d > schedule[block*2-2],
+                        Cycle.d < schedule[block*2-1]).count() }}
+                    {% if kpi.cycles.filter(Cycle.sequence==sequence,
+                        Cycle.d > schedule[block*2-2],
+                        Cycle.d < schedule[block*2-1]).count() %}
+                    <p><b>({{ (kpi.cycles.filter(Cycle.sequence==sequence, Cycle.code==2,
+                            Cycle.d > schedule[block*2-2],
+                            Cycle.d < schedule[block*2-1]).count() /
+                        kpi.cycles.filter(Cycle.sequence==sequence,
+                            Cycle.d > schedule[block*2-2],
+                            Cycle.d < schedule[block*2-1]).count() * 100)|int}}%)</b></p>
+                    {% endif %}
+                </td>
+                <td>
+                    <p>
+                        {{ kpi.cycles.filter(Cycle.sequence==sequence,
+                            Cycle.d > schedule[block*2-2],
+                            Cycle.d < schedule[block*2-1]).order_by(Cycle.d.desc()).first().delivered }}
+                    </p>
+                </td>
+                <td>
+                    {{ kpi.andons.filter(Andon.sequence==sequence,
+                        Andon.d > schedule[block*2-2],
+                        Andon.d < schedule[block*2-1]).count() }}
+                </td>
+            </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+    {% endfor %}
 {% endblock %}

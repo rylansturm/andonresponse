@@ -201,8 +201,11 @@ def kpi_popup(kpi_id):
 def kpi_overview(kpi_id):
     kpi = KPI.query.get(kpi_id)
     sequences = kpi.get_sequences()
+    schedule = kpi.schedule.return_schedule(kpi_d=kpi.d) if kpi.schedule else []
+    blocks = list(range(1, len(schedule)//2+1))
     return render_template(tempdir + 'kpi_overview.html', title='Shift Overview',
-                           kpi=kpi, sequences=sequences, Cycle=Cycle, Andon=Andon)
+                           kpi=kpi, sequences=sequences, schedule=schedule, blocks=blocks,
+                           datetime=datetime, Cycle=Cycle, Andon=Andon)
 
 
 @bp.route('/kpi/<area_name>/<shift>/<date>/edit', methods=['GET', 'POST'])
