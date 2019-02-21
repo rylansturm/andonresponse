@@ -27,7 +27,8 @@
                     <p>Sequence {{ sequence }}</p>
                 </th>
                 <td>
-                    {{ (t.total_seconds() / kpi.plan_cycle_time)|int }}
+                    {{ ((t.total_seconds() / kpi.plan_cycle_time) /
+                            kpi.cycles.filter(Cycle.sequence==sequence).order_by(Cycle.d.desc()).first().parts_per)|int }}
                 </td>
                 <td>
                     {{ kpi.cycles.filter(Cycle.sequence==sequence, Cycle.code==0).count() }} /
@@ -83,12 +84,10 @@
                     <p>Sequence {{ sequence }}</p>
                 </th>
                 <td>
-                    {% if kpi.cycles.filter(Cycle.sequence==sequence, Cycle.d > schedule[block*2-2],
-                                            Cycle.d < schedule[block*2-1]).count() %}
+                    {% if kpi.cycles.filter(Cycle.sequence==sequence).count() %}
                     {{ (((schedule[block*2-1] - schedule[block*2-2]).total_seconds() / kpi.plan_cycle_time) /
-                            kpi.cycles.filter(Cycle.sequence==sequence,
-                                        Cycle.d > schedule[block*2-2], Cycle.d < schedule[block*2-1]).order_by(
-                                                                            Cycle.d.desc()).first().parts_per)|int }}
+                            kpi.cycles.filter(Cycle.sequence==sequence).order_by(
+                                        Cycle.d.desc()).first().parts_per)|int }}
                     {% endif %}
                 </td>
                 <td>
