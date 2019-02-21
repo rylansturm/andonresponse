@@ -34,7 +34,7 @@
                     {{ kpi.cycles.filter(Cycle.sequence==sequence, Cycle.code==2).count() }}
                 </td>
                 <td>
-                    A Lot!
+                    {{ kpi.cycles.filter(Cycle.sequence==sequence).order_by(Cycle.d.desc()).first().delivered }}
                 </td>
                 <td>
                     {{ kpi.andons.filter(Andon.sequence==sequence).count() }}

@@ -58,8 +58,9 @@ def user(username):
     elif request.method == 'GET':
         area_form.items.data = ', '.join([a.name for a in user_areas])
         shift_form.items.data = ', '.join([s.name for s in user_shifts])
-    return render_template(tempdir + 'user.html', user=user, user_areas=user_areas, area_string=area_string,
-                           all_areas=all_areas, area_form=area_form, shift_form=shift_form, shift_string=shift_string)
+    return render_template(tempdir + 'user.html', title='User: ' + user.username, user=user, user_areas=user_areas,
+                           area_string=area_string, all_areas=all_areas, area_form=area_form,
+                           shift_form=shift_form, shift_string=shift_string)
 
 
 @bp.route('/edit_profile', methods=['GET', 'POST'])
@@ -133,10 +134,12 @@ def area_date(area_name, date):
     week = Week(date=date_from_string(date))
     if area_name != 'all':
         area = Area.query.filter_by(name=area_name).first_or_404()
-        return render_template(tempdir + 'area.html', area=area, week=week, KPI=KPI, user=current_user)
+        return render_template(tempdir + 'area.html', title=area_name + ' Overview',
+                               area=area, week=week, KPI=KPI, user=current_user)
     else:
         areas = Area.query.order_by(Area.name.asc()).all()
-        return render_template(tempdir + 'area_browse.html', areas=areas, week=week, user=current_user)
+        return render_template(tempdir + 'area_browse.html', title='All Areas',
+                               areas=areas, week=week, user=current_user)
 
 
 @bp.route('/area/<area_name>/schedules/<shift_name>/<schedule_name>', methods=['GET', 'POST'])
@@ -172,7 +175,8 @@ def config_schedule(area_name, shift_name, schedule_name):
                 form.end2.data = s.end2
                 form.end3.data = s.end3
                 form.end4.data = s.end4
-    return render_template(tempdir + 'config_schedule.html', area=area, shift=shift, form=form)
+    return render_template(tempdir + 'config_schedule.html', title='Edit Schedule',
+                           area=area, shift=shift, form=form)
 
 
 @bp.route('/area/<area_name>/schedules/<shift_name>', methods=['GET', 'POST'])
@@ -181,7 +185,8 @@ def area_schedules(area_name, shift_name):
     area = Area.query.filter_by(name=area_name).first()
     shift = Shift.query.filter_by(name=shift_name).first()
     schedules = Schedule.query.filter_by(schedule_area=area, schedule_shift=shift).all()
-    return render_template(tempdir + 'area_schedules.html', area=area, shift=shift, schedules=schedules)
+    return render_template(tempdir + 'area_schedules.html', title=area_name + ' ' + shift_name + ' Schedules',
+                           area=area, shift=shift, schedules=schedules)
 
 
 @bp.route('/kpi/<kpi_id>/popup', methods=['GET'])
@@ -196,7 +201,8 @@ def kpi_popup(kpi_id):
 def kpi_overview(kpi_id):
     kpi = KPI.query.get(kpi_id)
     sequences = kpi.get_sequences()
-    return render_template(tempdir + 'kpi_overview.html', kpi=kpi, sequences=sequences, Cycle=Cycle, Andon=Andon)
+    return render_template(tempdir + 'kpi_overview.html', title='Shift Overview',
+                           kpi=kpi, sequences=sequences, Cycle=Cycle, Andon=Andon)
 
 
 @bp.route('/kpi/<area_name>/<shift>/<date>/edit', methods=['GET', 'POST'])
@@ -236,7 +242,8 @@ def create_kpi(area_name, shift, date):
         form.area.data = area_name
         form.shift.data = shift
         form.date.data = d
-    return render_template(tempdir + 'create_kpi.html', form=form)
+    return render_template(tempdir + 'create_kpi.html', title='Plan Shift',
+                           form=form)
 
 
 @bp.route('/create_shift', methods=['GET', 'POST'])
@@ -252,4 +259,5 @@ def create_shift():
         db.session.commit()
         flash('You shift has been added')
         return redirect(url_for('main.area', area_name='all'))
-    return render_template(tempdir + 'create_shift.html', form=form)
+    return render_template(tempdir + 'create_shift.html', title='Create Shift',
+                           form=form)

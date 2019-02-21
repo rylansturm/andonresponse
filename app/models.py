@@ -149,7 +149,7 @@ def load_user(id):
 
 
 class KPI(db.Model):
-    """ shift plans. organized by shift and date, contains schedule, demand, pct """
+    """ shift plans. organized by shift and date, contains schedule, demand, pct, and relations to cycles & andons """
     __tablename__ = 'kpi'
     id = db.Column(db.Integer, primary_key=True)
     id_user = db.Column(db.Integer, db.ForeignKey('user.id'))
@@ -320,8 +320,7 @@ class Shift(db.Model):
 
 
 class Schedule(db.Model):
-    """ This model defines a generic schedule, unaware of date, used for assignment.
-    The AvailableTime class defines the specific, date-aware schedule for each shift. """
+    """ This model defines a generic schedule, unaware of date, used for assignment. """
     id = db.Column(db.Integer, primary_key=True)
     id_area = db.Column(db.Integer, db.ForeignKey('area.id'))
     id_shift = db.Column(db.Integer, db.ForeignKey('shift.id'))
