@@ -12,6 +12,7 @@
         <thead>
         <tr>
             <th scope="col">Sequence</th>
+            <th scope="col">Expected Cycles</th>
             <th scope="col">Early Cycle Count</th>
             <th scope="col">Target Cycle Count</th>
             <th scope="col">Late Cycle Count</th>
@@ -25,6 +26,9 @@
                 <th scope="row">
                     <p>Sequence {{ sequence }}</p>
                 </th>
+                <td>
+                    {{ (t.total_seconds() / kpi.plan_cycle_time)|int }}
+                </td>
                 <td>
                     {{ kpi.cycles.filter(Cycle.sequence==sequence, Cycle.code==0).count() }} /
                     {{ kpi.cycles.filter(Cycle.sequence==sequence).count() }}
@@ -64,6 +68,7 @@
         <thead>
         <tr>
             <th scope="col">Sequence</th>
+            <th scope="col">Expected Cycles</th>
             <th scope="col">Early Cycle Count</th>
             <th scope="col">Target Cycle Count</th>
             <th scope="col">Late Cycle Count</th>
@@ -77,6 +82,15 @@
                 <th scope="row">
                     <p>Sequence {{ sequence }}</p>
                 </th>
+                <td>
+                    {% if kpi.cycles.filter(Cycle.sequence==sequence, Cycle.d > schedule[block*2-2],
+                                            Cycle.d < schedule[block*2-1]).count() %}
+                    {{ (((schedule[block*2-1] - schedule[block*2-2]).total_seconds() / kpi.plan_cycle_time) /
+                            kpi.cycles.filter(Cycle.sequence==sequence,
+                                        Cycle.d > schedule[block*2-2], Cycle.d < schedule[block*2-1]).order_by(
+                                                                            Cycle.d.desc()).first().parts_per)|int }}
+                    {% endif %}
+                </td>
                 <td>
                     {{ kpi.cycles.filter(Cycle.sequence==sequence, Cycle.code==0,
                         Cycle.d > schedule[block*2-2],

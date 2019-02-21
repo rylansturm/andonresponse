@@ -200,11 +200,12 @@ def kpi_popup(kpi_id):
 @login_required
 def kpi_overview(kpi_id):
     kpi = KPI.query.get(kpi_id)
+    t = kpi.get_time_elapsed(d=datetime.datetime.now())
     sequences = kpi.get_sequences()
     schedule = kpi.schedule.return_schedule(kpi_d=kpi.d) if kpi.schedule else []
     blocks = list(range(1, len(schedule)//2+1))
     return render_template(tempdir + 'kpi_overview.html', title='Shift Overview',
-                           kpi=kpi, sequences=sequences, schedule=schedule, blocks=blocks,
+                           kpi=kpi, sequences=sequences, schedule=schedule, blocks=blocks, t=t,
                            datetime=datetime, Cycle=Cycle, Andon=Andon)
 
 
