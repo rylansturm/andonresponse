@@ -27,20 +27,20 @@
                 <td>
                     {{ kpi.cycles.filter(Cycle.sequence==sequence, Cycle.code==0).count() }} /
                     {{ kpi.cycles.filter(Cycle.sequence==sequence).count() }}
-                    ({{ kpi.cycles.filter(Cycle.sequence==sequence, Cycle.code==0).count() /
-                        kpi.cycles.filter(Cycle.sequence==sequence).count() * 100}}%)
+                    ({{ (kpi.cycles.filter(Cycle.sequence==sequence, Cycle.code==0).count() /
+                        kpi.cycles.filter(Cycle.sequence==sequence).count() * 100)|int}}%)
                 </td>
                 <td>
                     {{ kpi.cycles.filter(Cycle.sequence==sequence, Cycle.code==1).count() }} /
                     {{ kpi.cycles.filter(Cycle.sequence==sequence).count() }}
-                    ({{ kpi.cycles.filter(Cycle.sequence==sequence, Cycle.code==1).count() /
-                        kpi.cycles.filter(Cycle.sequence==sequence).count() * 100}}%)
+                    ({{ (kpi.cycles.filter(Cycle.sequence==sequence, Cycle.code==1).count() /
+                        kpi.cycles.filter(Cycle.sequence==sequence).count() * 100)|int}}%)
                 </td>
                 <td>
                     {{ kpi.cycles.filter(Cycle.sequence==sequence, Cycle.code==2).count() }} /
                     {{ kpi.cycles.filter(Cycle.sequence==sequence).count() }}
-                    ({{ kpi.cycles.filter(Cycle.sequence==sequence, Cycle.code==2).count() /
-                        kpi.cycles.filter(Cycle.sequence==sequence).count() * 100}}%)
+                    ({{ (kpi.cycles.filter(Cycle.sequence==sequence, Cycle.code==2).count() /
+                        kpi.cycles.filter(Cycle.sequence==sequence).count() * 100)|int}}%)
                 </td>
                 <td>
                     <meter min="0" max="{{ kpi.demand }}"
