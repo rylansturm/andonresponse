@@ -200,6 +200,8 @@ def kpi_popup(kpi_id):
 @login_required
 def kpi_overview(kpi_id):
     kpi = KPI.query.get(kpi_id)
+    if not kpi.schedule:
+        kpi.add_schedule('Regular')
     t = kpi.get_time_elapsed(d=datetime.datetime.now())
     sequences = kpi.get_sequences()
     schedule = kpi.schedule.return_schedule(kpi_d=kpi.d) if kpi.schedule else []
