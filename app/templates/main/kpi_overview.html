@@ -8,7 +8,6 @@
     </table>
     <hr>
     <table class="table table-striped table-bordered">
-        Full Shift
         <thead>
         <tr>
             <th scope="col">Sequence</th>
@@ -16,8 +15,10 @@
             <th scope="col">
                 Block {{ block }}
                 <p>{{ (schedule[block*2-1] - schedule[block*2-2]).total_seconds()|int }} Seconds</p>
-                {% if schedule[block*2-2] < datetime.datetime.now() < schedule[block*2-1] %}
+                {% if schedule[block*2-2] < datetime.datetime.now() %}
+                {% if datetime.datetime.now() < schedule[block*2-1] %}
                 <p style="color:red">IN PROGRESS</p>
+                {% endif %}
                 {% endif %}
             </th>
             {% endfor %}
