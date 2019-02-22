@@ -408,6 +408,7 @@ class Andon(db.Model):
     d = db.Column(db.DateTime)
     sequence = db.Column(db.Integer)
     responded = db.Column(db.Boolean)
+    response_d = db.Column(db.DateTime)
 
     def from_dict(self, data):
         for field in ['id_kpi', 'd', 'sequence', 'responded']:
@@ -423,6 +424,15 @@ class Andon(db.Model):
             'responded': self.responded
         }
         return data
+
+    @staticmethod
+    def respond(data):
+        id_kpi = data['id_kpi'] or None
+        sequence = data['sequence'] or None
+        response_d = data['response_d'] or None
+        for andon in Andon.query.filter_by(id_kpi=id_kpi, sequence=sequence).all():
+            andon.responded = 1
+            andon.response_d = response_d
 
 # TODO: Process Class
 # TODO: Operator Class

@@ -18,6 +18,13 @@ def create_andon():
     return response
 
 
+@bp.route('/andon/respond', methods=['POST'])
+def andon_response():
+    data = request.get_json() or {}
+    Andon.respond(data)
+    return jsonify(data)
+
+
 @bp.route('/andon/<int:id>', methods=['GET'])
 def get_andon(id):
     return jsonify(Andon.query.get_or_404(id).to_dict())
