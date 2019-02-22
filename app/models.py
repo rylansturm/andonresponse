@@ -433,6 +433,7 @@ class Andon(db.Model):
         for andon in Andon.query.filter_by(id_kpi=id_kpi, sequence=sequence).all():
             andon.responded = 1
             andon.response_d = response_d
+        db.session.commit()
 
 # TODO: Process Class
 # TODO: Operator Class
