@@ -250,7 +250,7 @@ class KPI(db.Model):
             if not s.first():
                 parts_per = kpi.cycles.filter(Cycle.sequence == sequence).order_by(Cycle.d.desc()).first().parts_per
             else:
-                parts_per = s.order_by(Cycle.d.desc()).fist().parts_per
+                parts_per = s.order_by(Cycle.d.desc()).first().parts_per
             data[sequence] = {'Cycles': s.count(),
                               'Expected': available_time // (pct * parts_per),
                               'Andons': kpi.andons.filter(Andon.sequence == sequence,
