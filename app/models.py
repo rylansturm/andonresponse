@@ -234,8 +234,8 @@ class KPI(db.Model):
     def get_block_data_dict(area, shift, date, block):
         kpi = KPI.get_kpi(area, shift, date)
         schedule = kpi.schedule.return_schedule(kpi_d=kpi.d)
-        start = schedule[block*2-2]
-        end = schedule[block*2-1]
+        start = schedule[int(block)*2-2]
+        end = schedule[int(block)*2-1]
         available_time = int((end-start).total_seconds())
         cycles = kpi.cycles.filter(Cycle.id_kpi == kpi.id,
                                    Cycle.d > start,
