@@ -22,6 +22,7 @@
             <th scope="col">Shift</th>
             {% for day in week.to_dict() %}
             <th scope="col">{{ day }} {{ week.to_dict()[day] }}</th>
+            {% endfor %}
         </tr>
         </thead>
         <tbody>
