@@ -48,6 +48,12 @@
                         Expected: 0 (missing data)
                     </p>
                     {% endif %}
+                    <p>
+                        Andons: {{ Andon.query.filter(Andon.id_kpi == kpi.id,
+                                                      Andon.sequence == sequence,
+                                                      Andon.d >= schedule[block*2-2],
+                                                      Andon.d <= schedule[block*2-1]).count() }}
+                    </p>
                 </td>
                 {% endfor %}
             </tr>

@@ -233,6 +233,8 @@ class KPI(db.Model):
     @staticmethod
     def get_block_data_dict(area, shift, date, block):
         kpi = KPI.get_kpi(area, shift, date)
+        if not kpi:
+            return {"error": "No KPI matches the request"}
         pct = kpi.plan_cycle_time
         schedule = kpi.schedule.return_schedule(kpi_d=kpi.d)
         start = schedule[int(block)*2-2]
