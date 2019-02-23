@@ -14,14 +14,17 @@
             {% for block in blocks %}
             <th scope="col">
                 Block {{ block }}
-                <p>{{ (schedule[block*2-1] - schedule[block*2-2]).total_seconds()|int }} Seconds</p>
                 {% if schedule[block*2-2] < datetime.datetime.now() - datetime.timedelta(hours=7)%}
                 {% if datetime.datetime.now() - datetime.timedelta(hours=7) < schedule[block*2-1] %}
                 <p style="color:red">IN PROGRESS</p>
                 {% endif %}
                 {% endif %}
+                <p>{{ (schedule[block*2-1] - schedule[block*2-2]).total_seconds()|int }} Seconds</p>
             </th>
             {% endfor %}
+            <th>
+                Totals
+            </th>
         </tr>
         </thead>
         <tbody>
@@ -56,6 +59,26 @@
                     </p>
                 </td>
                 {% endfor %}
+                <td>
+                    <p>
+                        Cycles: {{ kpi.cycles.filter(Cycle.sequence==sequence).count() }}
+                    </p>
+                    {% if kpi.cycles.filter(Cycle.sequence==sequence).first().parts_per %}
+                    <p>
+                        Expected: {{ (kpi.schedule.get_available_time() /
+                                        (kpi.plan_cycle_time * kpi.cycles.filter(Cycle.sequence==sequence).order_by(
+                                                                        Cycle.d.desc()).first().parts_per))|int }}
+                    </p>
+                    {% else %}
+                    <p>
+                        Expected: 0 (missing data)
+                    </p>
+                    {% endif %}
+                    <p>
+                        Andons: {{ Andon.query.filter(Andon.id_kpi == kpi.id,
+                                                      Andon.sequence == sequence).count() }}
+                    </p>
+                </td>
             </tr>
         {% endfor %}
         </tbody>
