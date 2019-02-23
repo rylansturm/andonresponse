@@ -233,6 +233,7 @@ class KPI(db.Model):
     @staticmethod
     def get_block_data_dict(area, shift, date, block):
         kpi = KPI.get_kpi(area, shift, date)
+        pct = kpi.plan_cycle_time
         schedule = kpi.schedule.return_schedule(kpi_d=kpi.d)
         start = schedule[int(block)*2-2]
         end = schedule[int(block)*2-1]
@@ -241,21 +242,39 @@ class KPI(db.Model):
                                    Cycle.d > start,
                                    Cycle.d < end)
         sequences = kpi.get_sequences()
-        data = {s.first().sequence:
-                    {'Cycles': s.count(),
-                     'Expected': available_time // (kpi.plan_cycle_time * s.first().parts_per),
-                     'Andons': kpi.andons.filter(Andon.sequence == s.first().sequence,
-                                                 Andon.d > start,
-                                                 Andon.d < end).count(),
-                     'Responded': True if kpi.andons.filter(Andon.sequence == s.first().sequence).count() == 0 else
-                     True if kpi.andons.filter(
-                         Andon.sequence == s.first().sequence).order_by(
-                         Andon.d.desc()).first().responded else False,
-                     }
-                for s in [kpi.cycles.filter(Cycle.sequence == sequence,
-                                            Cycle.d >= start,
-                                            Cycle.d <= end)
-                          for sequence in sequences]}
+        data = {}
+        for sequence in sequences:
+            s = kpi.cycles.filter(Cycle.sequence == sequence,
+                                  Cycle.d >= start,
+                                  Cycle.d <= end)
+            if not s.first():
+                parts_per = kpi.cycles.filter(Cycle.sequence == sequence).order_by(Cycle.d.desc()).first().parts_per
+            else:
+                parts_per = s.order_by(Cycle.d.desc()).fist().parts_per
+            data[sequence] = {'Cycles': s.count(),
+                              'Expected': available_time // (pct * parts_per),
+                              'Andons': kpi.andons.filter(Andon.sequence == sequence,
+                                                          Andon.d > start,
+                                                          Andon.d < end).count(),
+                              'Responded': True if kpi.andons.filter(Andon.sequence == sequence).count() == 0 else
+                              True if kpi.andons.filter(Andon.sequence == sequence).order_by(
+                                  Andon.d.desc()).first().responded else False
+                              }
+        # data = {s.first.sequence():
+        #             {'Cycles': s.count(),
+        #              'Expected': available_time // (kpi.plan_cycle_time * s.first().parts_per),
+        #              'Andons': kpi.andons.filter(Andon.sequence == s.first().sequence,
+        #                                          Andon.d > start,
+        #                                          Andon.d < end).count(),
+        #              'Responded': True if kpi.andons.filter(Andon.sequence == s.first().sequence).count() == 0 else
+        #              True if kpi.andons.filter(
+        #                  Andon.sequence == s.first().sequence).order_by(
+        #                  Andon.d.desc()).first().responded else False,
+        #              }
+        #         for s in [kpi.cycles.filter(Cycle.sequence == sequence,
+        #                                     Cycle.d >= start,
+        #                                     Cycle.d <= end)
+        #                   for sequence in sequences]}
         return data
 
 
