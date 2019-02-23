@@ -241,12 +241,6 @@ class KPI(db.Model):
                                    Cycle.d > start,
                                    Cycle.d < end)
         sequences = kpi.get_sequences()
-        data = {'Sequence #': {'Cycles': None,
-                               'Expected': None,
-                               'Andons': None,
-                               'Responded': True
-                               }
-                }
         data = {s.first().sequence:
                     {'Cycles': s.count(),
                      'Expected': available_time // (kpi.plan_cycle_time * s.first().parts_per),
@@ -255,12 +249,13 @@ class KPI(db.Model):
                                                  Andon.d < end).count(),
                      'Responded': True if kpi.andons.filter(
                          Andon.sequence == s.first().sequence).order_by(
-                         Andon.d.desc()).first().responded else False,
+                         Andon.d.desc()).first().responded or 1 else False,
                      }
                 for s in [kpi.cycles.filter(Cycle.sequence == sequence,
                                             Cycle.d >= start,
                                             Cycle.d <= end)
                           for sequence in sequences]}
+        return data
 
 
 class Area(db.Model):
