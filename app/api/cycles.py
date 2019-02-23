@@ -1,5 +1,5 @@
 from flask import request, jsonify, url_for
-from app.models import Cycle
+from app.models import Cycle, KPI
 from app.api import bp
 from app import db
 
@@ -20,3 +20,8 @@ def create_cycle():
 @bp.route('/cycles/<int:id>', methods=['GET'])
 def get_cycle(id):
     return jsonify(Cycle.query.get_or_404(id).to_dict())
+
+
+@bp.route('/cycles/block_tracker/<area>/<shift>/<date>/<block>', methods=['GET'])
+def block_tracker(area, shift, date, block):
+    return jsonify(KPI.get_block_data_dict(area, shift, date, block))

@@ -230,6 +230,38 @@ class KPI(db.Model):
         kpi = KPI.query.filter_by(area=a, shift=s, d=d).first()
         return kpi
 
+    @staticmethod
+    def get_block_data_dict(area, shift, date, block):
+        kpi = KPI.get_kpi(area, shift, date)
+        schedule = kpi.schedule.return_schedule(kpi_d=kpi.d)
+        start = schedule[block*2-2]
+        end = schedule[block*2-1]
+        available_time = int((end-start).total_seconds())
+        cycles = kpi.cycles.filter(Cycle.id_kpi == kpi.id,
+                                   Cycle.d > start,
+                                   Cycle.d < end)
+        sequences = kpi.get_sequences()
+        data = {'Sequence #': {'Cycles': None,
+                               'Expected': None,
+                               'Andons': None,
+                               'Responded': True
+                               }
+                }
+        data = {s.first().sequence:
+                    {'Cycles': s.count(),
+                     'Expected': available_time // (kpi.plan_cycle_time * s.first().parts_per),
+                     'Andons': kpi.andons.filter(Andon.sequence == s.first().sequence,
+                                                 Andon.d > start,
+                                                 Andon.d < end).count(),
+                     'Responded': True if kpi.andons.filter(
+                         Andon.sequence == s.first().sequence).order_by(
+                         Andon.d.desc()).first().responded else False,
+                     }
+                for s in [kpi.cycles.filter(Cycle.sequence == sequence,
+                                            Cycle.d >= start,
+                                            Cycle.d <= end)
+                          for sequence in sequences]}
+
 
 class Area(db.Model):
     """ all areas with timers """
