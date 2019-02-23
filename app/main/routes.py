@@ -134,8 +134,8 @@ def area_date(area_name, date):
     week = Week(date=date_from_string(date))
     if area_name != 'all':
         area = Area.query.filter_by(name=area_name).first_or_404()
-        return render_template(tempdir + 'area.html', title=area_name + ' Overview',
-                               area=area, week=week, KPI=KPI, user=current_user)
+        return render_template(tempdir + 'area.html', title=area_name + ' Overview', date=date, dfs=date_from_string,
+                               area=area, week=week, KPI=KPI, user=current_user, datetime=datetime)
     else:
         areas = Area.query.order_by(Area.name.asc()).all()
         return render_template(tempdir + 'area_browse.html', title='All Areas',

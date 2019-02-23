@@ -28,8 +28,8 @@ class Week(object):
     def __init__(self, date=datetime.date.today()):
         _weekday = datetime.date.weekday(date)
         _monday = date - datetime.timedelta(_weekday)
-        if _weekday > 4:
-            _monday += datetime.timedelta(7)
+        if _weekday > 5:
+            _monday += datetime.timedelta(days=7)
         self.monday[2] = _monday
         for _day, _interval in [(self.tuesday, 1), (self.wednesday, 2),
                                 (self.thursday, 3), (self.friday, 4), (self.saturday, 5)]:

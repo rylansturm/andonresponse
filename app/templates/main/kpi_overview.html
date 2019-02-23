@@ -13,12 +13,12 @@
             <th scope="col">Sequence</th>
             {% for block in blocks %}
             <th scope="col">
-                Block {{ block }}
                 {% if schedule[block*2-2] < datetime.datetime.now() - datetime.timedelta(hours=7)%}
                 {% if datetime.datetime.now() - datetime.timedelta(hours=7) < schedule[block*2-1] %}
                 <p style="color:red">IN PROGRESS</p>
                 {% endif %}
                 {% endif %}
+                Block {{ block }}
                 <p>{{ (schedule[block*2-1] - schedule[block*2-2]).total_seconds()|int }} Seconds</p>
             </th>
             {% endfor %}
