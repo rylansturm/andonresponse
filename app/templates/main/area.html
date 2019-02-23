@@ -10,10 +10,10 @@
     <p>You can edit stuff here!</p>
     {% endif %}
     <hr>
-    <a href="{{ url_for('main.area_date', area_name=area.name, date=dfs(date) - datetime.timedelta(days=7)">
+    <a href="{{ url_for('main.area_date', area_name=area.name, date=dfs(date) - datetime.timedelta(days=7)) }}">
         Previous Week
     </a>
-    <a href="{{ url_for('main.area_date', area_name=area.name, date=dfs(date) + datetime.timedelta(days=7)">
+    <a href="{{ url_for('main.area_date', area_name=area.name, date=dfs(date) + datetime.timedelta(days=7)) }}">
         Next Week
     </a>
     <table class="table table-striped table-bordered">
