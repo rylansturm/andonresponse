@@ -247,9 +247,10 @@ class KPI(db.Model):
                      'Andons': kpi.andons.filter(Andon.sequence == s.first().sequence,
                                                  Andon.d > start,
                                                  Andon.d < end).count(),
-                     'Responded': True if kpi.andons.filter(
+                     'Responded': True if kpi.andons.filter(Andon.sequence == s.first().sequence).count() == 0 else
+                     True if kpi.andons.filter(
                          Andon.sequence == s.first().sequence).order_by(
-                         Andon.d.desc()).first().responded or 1 else False,
+                         Andon.d.desc()).first().responded else False,
                      }
                 for s in [kpi.cycles.filter(Cycle.sequence == sequence,
                                             Cycle.d >= start,
