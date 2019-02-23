@@ -41,6 +41,15 @@ class Week(object):
                 self.thursday, self.friday, self.saturday]]
         return week
 
+    def to_dict(self):
+        return {self.monday[0]: self.monday[2],
+                self.tuesday[0]: self.tuesday[2],
+                self.wednesday[0]: self.wednesday[2],
+                self.thursday[0]: self.thursday[2],
+                self.friday[0]: self.friday[2],
+                self.saturday[0]: self.saturday[2]
+                }
+
 
 def date_from_string(date):
     """ returns a datetime.date object. arg can be string (format below), datetime.date, or datetime.datetime """
