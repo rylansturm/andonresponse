@@ -479,7 +479,7 @@ class Andon(db.Model):
         id_kpi = data['id_kpi'] or None
         sequence = data['sequence'] or None
         response_d = data['response_d'] or None
-        for andon in Andon.query.filter_by(id_kpi=id_kpi, sequence=sequence).all():
+        for andon in Andon.query.filter_by(id_kpi=id_kpi, sequence=sequence, responded=0).all():
             andon.responded = 1
             andon.response_d = response_d
         db.session.commit()
