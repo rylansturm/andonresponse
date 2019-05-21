@@ -160,7 +160,7 @@ def config_schedule(area_name, shift_name, schedule_name):
                           start4=form.start4.data, end1=form.end1.data, end2=form.end2.data,
                           end3=form.end3.data, end4=form.end4.data)
         db.session.commit()
-        flash('Successfully added {} shift for {} {}'.format(form.name.data, area.name, shift.name))
+        flash('Successfully added {} schedule for {} {}'.format(form.name.data, area.name, shift.name))
         return redirect(url_for('main.area_schedules', area_name=area_name, shift_name=shift_name))
     elif request.method == 'GET':
         if schedule_name != 'new':

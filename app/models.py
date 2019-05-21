@@ -430,6 +430,31 @@ class Schedule(db.Model):
         block = 1 if block == 0 else block
         return block
 
+    def from_dict(self, data):
+        for field in ['schedule_area', 'schedule_shift', 'name'
+                      'start1', 'start2', 'start3', 'start4',
+                      'end1', 'end2', 'end3', 'end4'
+                      ]:
+            if field in data:
+                setattr(self, field, data[field])
+
+    def to_dict(self):
+        data = {
+            'id': self.id,
+            'id_area': self.id_area,
+            'id_shift': self.id_shift,
+            'name': self.name,
+            'start1': self.start1,
+            'start2': self.start2,
+            'start3': self.start3,
+            'start4': self.start4,
+            'end1': self.end1,
+            'end2': self.end2,
+            'end3': self.end3,
+            'end4': self.end4,
+        }
+        return data
+
 
 class Cycle(db.Model):
     """ Each cycle from the operator is logged in this format """
