@@ -149,7 +149,7 @@ def config_schedule(area_name, shift_name, schedule_name):
     shift = Shift.query.filter_by(name=shift_name).first()
     form = CreateScheduleForm(original_name=schedule_name, area=area, shift=shift)
     if form.validate_on_submit():
-        s = Schedule.query.filter_by(name=schedule_name).first()
+        s = Schedule.query.filter_by(name=schedule_name, id_shift=shift.id).first()
         if not s:
             s = Schedule(name=form.name.data)
             db.session.add(s)
