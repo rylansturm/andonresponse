@@ -431,7 +431,7 @@ class Schedule(db.Model):
         return block
 
     def from_dict(self, data):
-        for field in ['schedule_area', 'schedule_shift', 'name'
+        for field in ['schedule_area', 'schedule_shift', 'name',
                       'start1', 'start2', 'start3', 'start4',
                       'end1', 'end2', 'end3', 'end4'
                       ]:
