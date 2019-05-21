@@ -444,14 +444,14 @@ class Schedule(db.Model):
             'id_area': self.id_area,
             'id_shift': self.id_shift,
             'name': self.name,
-            'start1': self.start1,
-            'start2': self.start2,
-            'start3': self.start3,
-            'start4': self.start4,
-            'end1': self.end1,
-            'end2': self.end2,
-            'end3': self.end3,
-            'end4': self.end4,
+            'start1': str(self.start1),
+            'start2': str(self.start2),
+            'start3': str(self.start3),
+            'start4': str(self.start4),
+            'end1': str(self.end1),
+            'end2': str(self.end2),
+            'end3': str(self.end3),
+            'end4': str(self.end4),
         }
         return data
 
