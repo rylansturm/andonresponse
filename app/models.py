@@ -424,7 +424,7 @@ class Schedule(db.Model):
 
     def get_current_block(self):
         block = 0
-        for time in self.return_schedule(self.kpi.d)[0::2]:
+        for time in self.return_schedule(datetime.date.today())[0::2]:
             if datetime.datetime.now() > time:
                 block += 1
         block = 1 if block == 0 else block
