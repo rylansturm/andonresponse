@@ -2,4 +2,4 @@ from flask import Blueprint
 
 bp = Blueprint('api', __name__)
 
-from app.api import users, errors, tokens, cycles, kpi, andons
+from app.api import users, errors, tokens, cycles, kpi, andons, schedules
