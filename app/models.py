@@ -235,7 +235,7 @@ class KPI(db.Model):
         kpi = KPI.get_kpi(area, shift, date)
         if not kpi:
             return {"error": "No KPI matches the request"}
-        if not block:
+        if not int(block):
             block = kpi.schedule.get_current_block() or 1
         pct = kpi.plan_cycle_time
         schedule = kpi.schedule.return_schedule(kpi_d=kpi.d)
