@@ -236,7 +236,7 @@ class KPI(db.Model):
         if not kpi:
             return {"error": "No KPI matches the request"}
         if not int(block):
-            block = kpi.schedule.get_current_block() or 1
+            block = kpi.schedule.get_current_block(kpi.d) or 1
         pct = kpi.plan_cycle_time
         schedule = kpi.schedule.return_schedule(kpi_d=kpi.d)
         start = schedule[int(block)*2-2]
@@ -422,9 +422,9 @@ class Schedule(db.Model):
     def add_shift(self, shift):
         self.schedule_shift = shift
 
-    def get_current_block(self):
+    def get_current_block(self, kpi_d=datetime.date.today()):
         block = 0
-        for time in self.return_schedule(datetime.date.today())[0::2]:
+        for time in self.return_schedule(kpi_d)[0::2]:
             if datetime.datetime.now() > time:
                 block += 1
         block = 1 if block == 0 else block
