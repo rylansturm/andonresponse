@@ -416,9 +416,8 @@ class Schedule(db.Model):
                     new_times.append(dft(time, kpi_d))
                 else:
                     if time < times[i-1]:
-                        new_times.append(dft(time, kpi_d + datetime.timedelta(1)))
-                    else:
-                        new_times.append(dft(time, kpi_d))
+                        kpi_d += datetime.timedelta(1)
+                    new_times.append(dft(time, kpi_d))
         return new_times
 
     def make_times_list(self, **kwargs):
