@@ -20,6 +20,7 @@ class Var:
               8: 'Chamfer',
               }
 
+
 app.addLabel('header', colspan=2)
 for seq in [1, 2, 3, 4, 5, 6, 7, 8]:
     meter = 'blockCycles{}'.format(seq)
@@ -50,6 +51,7 @@ def create_kpi():
     except ConnectionError:
         print('Connection Failed')
 
+
 def tracker():
     now = datetime.datetime.now()
     if now.hour >= 23:
@@ -59,13 +61,13 @@ def tracker():
                 create_kpi()
         Var.block = 1
     elif now.hour >= 15:
-        if now.minute >= 15:
+        if now.minute >= 15 or now.hour != 15:
             if Var.shift != 'Swing':
                 Var.shift = 'Swing'
                 create_kpi()
         Var.block = 4 if now.hour >= 21 else 3 if now.hour >= 19 else 2 if now.hour >= 17 else 1
     elif now.hour >= 7:
-        if now.minute >= 15:
+        if now.minute >= 15 or now.hour != 7:
             if Var.shift != 'Day':
                 Var.shift = 'Day'
                 create_kpi()
@@ -76,7 +78,13 @@ def tracker():
             create_kpi()
         Var.block = 4 if now.hour >= 5 else 3 if now.hour >= 3 else 2 if now.hour >= 1 else 1
     app.setLabel('header', '{} Shift\t\t{}\t\tBlock {}'.format(Var.shift, now.strftime('%I:%M %p'), Var.block))
-    r = requests.get('https://localhost/api/cycles/block_tracker/Talladega/{}/{}/0'.format(Var.shift, str(datetime.date.today())), verify=False).json()
+    kpi_date = datetime.date.today()
+    if Var.shift == 'Grave':
+        if datetime.datetime.now().hour < 7:
+            kpi_date -= datetime.timedelta(days=1)
+
+    r = requests.get('https://localhost/api/cycles/block_tracker/Talladega/{}/{}/0'.format(
+        Var.shift, str(kpi_date)), verify=False).json()
     for seq in [1, 2, 3, 4, 5, 6, 7, 8]:
         try:
             name = Var.labels[seq]
@@ -87,8 +95,10 @@ def tracker():
             app.setLabel('andon{}'.format(seq), 'ANDON' if not responded else 'Normal')
             app.setLabelBg('andon{}'.format(seq), 'red' if not responded else 'green')
         except:
+            name = Var.labels[seq]
             app.setMeter('blockCycles{}'.format(seq), 0, name)
             app.setLabel('andon{}'.format(seq), 'N/A')
+
 
 app.registerEvent(tracker)
 

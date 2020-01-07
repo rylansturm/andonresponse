@@ -396,17 +396,27 @@ class Schedule(db.Model):
     def return_schedule(self, kpi_d: datetime.date = datetime.date.today()):
         times = self.return_times_list()
         new_times = []
-        for i in range(len(times)-1, -1, -1):
+        """ old code block had grave kpi_d on day shift ended """
+        # for i in range(len(times)-1, -1, -1):
+        #     time = times[i]
+        #     if type(time) == datetime.time:
+        #         if i < len(times) - 1:
+        #             if time < times[i+1]:
+        #                 new_time = dft(time, kpi_d)
+        #             else:
+        #                 new_time = dft(time, kpi_d - datetime.timedelta(1))
+        #         else:
+        #             new_time = dft(time, kpi_d)
+        #         new_times.insert(0, new_time)
+        """ new code block has grave kpi_d on start date """
+        for i in range(len(times)):
             time = times[i]
             if type(time) == datetime.time:
-                if i < len(times) - 1:
-                    if time < times[i+1]:
-                        new_time = dft(time, kpi_d)
-                    else:
-                        new_time = dft(time, kpi_d - datetime.timedelta(1))
+                if i == 0:
+                    new_times.append(dft(time, kpi_d))
                 else:
-                    new_time = dft(time, kpi_d)
-                new_times.insert(0, new_time)
+                    if time < times[i-1]:
+                        new_times.append(dft(time, kpi_d + datetime.timedelta(1)))
         return new_times
 
     def make_times_list(self, **kwargs):
