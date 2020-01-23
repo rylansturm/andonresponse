@@ -19,6 +19,11 @@ class Var:
               7: 'Finish',
               8: 'Chamfer',
               }
+    colors = {'Safety': 'red',
+              'Quality': 'white',
+              'Delivery': 'blue',
+              'NoType': 'blue',
+              }
 
 
 app.addLabel('header', colspan=2)
@@ -91,9 +96,10 @@ def tracker():
             cycles = r[str(seq)]['Cycles']
             expected = r[str(seq)]['Expected']
             responded = bool(r[str(seq)]['Responded'])
+            andon_type = r[str(seq)]['Andon_Type']
             app.setMeter('blockCycles{}'.format(seq), (cycles/expected)*100, '{}  {}/{}'.format(name, cycles, expected))
             app.setLabel('andon{}'.format(seq), 'ANDON' if not responded else 'Normal')
-            app.setLabelBg('andon{}'.format(seq), 'red' if not responded else 'green')
+            app.setLabelBg('andon{}'.format(seq), Var.colors[andon_type] if not responded else 'green')
         except:
             name = Var.labels[seq]
             app.setMeter('blockCycles{}'.format(seq), 0, name)

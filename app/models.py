@@ -262,8 +262,15 @@ class KPI(db.Model):
                                                           Andon.d < end).count(),
                               'Responded': True if kpi.andons.filter(Andon.sequence == sequence).count() == 0 else
                               True if kpi.andons.filter(Andon.sequence == sequence).order_by(
-                                  Andon.d.desc()).first().responded else False
+                                  Andon.d.desc()).first().responded else False,
+                              'Andon_Type': None
                               }
+            andon_type_list = [a.andon_type for a in kpi.andons.filter(Andon.sequence == sequence,
+                                                                       Andon.responded == 0).all()]
+            data[sequence]['Andon_Type'] = None if data[sequence]['Responded'] else \
+                'Safety' if 'Safety' in andon_type_list else \
+                'Quality' if 'Quality' in andon_type_list else \
+                'Delivery' if 'Delivery' in andon_type_list else 'NoType'
         # data = {s.first.sequence():
         #             {'Cycles': s.count(),
         #              'Expected': available_time // (kpi.plan_cycle_time * s.first().parts_per),
@@ -497,16 +504,17 @@ class Cycle(db.Model):
 
 
 class Andon(db.Model):
-    """ Keeps track of the number of andons (and possibly type of andon in the future?) """
+    """ Keeps track of the number of andons and type of andons """
     id = db.Column(db.Integer, primary_key=True)
     id_kpi = db.Column(db.Integer, db.ForeignKey('kpi.id'))
     d = db.Column(db.DateTime)
     sequence = db.Column(db.Integer)
+    andon_type = db.Column(db.String(10))
     responded = db.Column(db.Boolean)
     response_d = db.Column(db.DateTime)
 
     def from_dict(self, data):
-        for field in ['id_kpi', 'd', 'sequence', 'responded']:
+        for field in ['id_kpi', 'd', 'sequence', 'andon_type', 'responded']:
             if field in data:
                 setattr(self, field, data[field])
 
@@ -516,6 +524,7 @@ class Andon(db.Model):
             'id_kpi': self.id_kpi,
             'd': self.d,
             'sequence': self.sequence,
+            'andon_type': self.andon_type,
             'responded': self.responded
         }
         return data
