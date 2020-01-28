@@ -8,6 +8,7 @@ app.setSize('fullscreen')
 
 
 class Var:
+    area = 'Talladega'
     block = 1
     shift = ''
     labels = {1: 'Assembly',
@@ -43,12 +44,18 @@ def create_kpi():
     if Var.shift == 'Grave':
         if datetime.datetime.now().hour < 7:
             kpi_date -= datetime.timedelta(days=1)
+    last_kpi = requests.get('https://localhost/api/kpi/{}/{}/{}'.format(
+        Var.area, Var.shift, str(kpi_date - datetime.timedelta(days=1))), verify=False)
+    if last_kpi.status_code == 200:
+        last_plan_cycle_time = last_kpi.json()['plan_cycle_time']
+    else:
+        last_plan_cycle_time = 54
     data = {'area': 'Talladega',
             'shift': Var.shift,
             'schedule': 'Regular',
             'd': str(kpi_date),
             'demand': 0,
-            'plan_cycle_time': 58
+            'plan_cycle_time': last_plan_cycle_time
             }
     try:
         r = requests.post('https://localhost/api/kpi', json=data, verify=False)
