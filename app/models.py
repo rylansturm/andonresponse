@@ -403,28 +403,22 @@ class Schedule(db.Model):
     def return_schedule(self, kpi_d: datetime.date = datetime.date.today()):
         times = self.return_times_list()
         new_times = []
-        """ old code block had grave kpi_d on date shift ended """
-        # for i in range(len(times)-1, -1, -1):
-        #     time = times[i]
-        #     if type(time) == datetime.time:
-        #         if i < len(times) - 1:
-        #             if time < times[i+1]:
-        #                 new_time = dft(time, kpi_d)
-        #             else:
-        #                 new_time = dft(time, kpi_d - datetime.timedelta(1))
-        #         else:
-        #             new_time = dft(time, kpi_d)
-        #         new_times.insert(0, new_time)
-        """ new code block has grave kpi_d on start date """
         for i in range(len(times)):
             time = times[i]
             if type(time) == datetime.time:
-                if i == 0:
-                    new_times.append(dft(time, kpi_d))
+                """ changed logic for grave kpi_d; 
+                    usually same result, but allows avail time to start after midnight """
+                if self.schedule_shift.name == 'Grave' and time.hour <= 7:
+                    new_times.append(dft(time, kpi_d + datetime.timedelta(1)))
                 else:
-                    if time < times[i-1]:
-                        kpi_d += datetime.timedelta(1)
                     new_times.append(dft(time, kpi_d))
+                """ old code caused errors if schedule.start1 was after midnight """
+                # if i == 0:
+                #     new_times.append(dft(time, kpi_d))
+                # else:
+                #     if time < times[i-1]:
+                #         kpi_d += datetime.timedelta(1)
+                #     new_times.append(dft(time, kpi_d))
         return new_times
 
     def make_times_list(self, **kwargs):
