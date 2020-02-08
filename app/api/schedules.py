@@ -31,3 +31,11 @@ def create_schedule():
 def get_schedule(id):
     schedule = Schedule.query.get_or_404(id)
     return jsonify(schedule.to_dict())
+
+
+@bp.route('/schedules/<area>/<shift>/<name>')
+def real_get_schedule(area, shift, name):
+    a = Area.query.filter_by(name=area).first()
+    s = Shift.query.filter_by(name=shift).first()
+    schedule = Schedule.query.filter_by(schedule_area=a, schedule_shift=s, name=name).first()
+    return get_schedule(schedule.id)

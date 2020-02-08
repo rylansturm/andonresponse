@@ -407,7 +407,7 @@ class Schedule(db.Model):
             time = times[i]
             if type(time) == datetime.time:
                 """ changed logic for grave kpi_d; 
-                    usually same result, but allows avail time to start after midnight """
+                    usually same result, but allows available time to start after midnight """
                 if self.schedule_shift.name == 'Grave' and time.hour <= 7:
                     new_times.append(dft(time, kpi_d + datetime.timedelta(1)))
                 else:
