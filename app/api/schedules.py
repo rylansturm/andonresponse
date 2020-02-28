@@ -39,3 +39,15 @@ def real_get_schedule(area, shift, name):
     s = Shift.query.filter_by(name=shift).first()
     schedule = Schedule.query.filter_by(schedule_area=a, schedule_shift=s, name=name).first()
     return get_schedule(schedule.id)
+
+
+@bp.route('/schedules/list/<area>/<shift>')
+def get_schedule_list(area, shift):
+    a = Area.query.filter_by(name=area).first()
+    s = Shift.query.filter_by(name=shift).first()
+    schedule_name_list = [schedule.name for schedule in Schedule.query.filter_by(
+        schedule_area=a, schedule_shift=s).all()]
+    data = {}
+    for name in schedule_name_list:
+        data[name] = real_get_schedule(area, shift, name)
+    return jsonify(data)
