@@ -406,9 +406,9 @@ class Schedule(db.Model):
         for i in range(len(times)):
             time = times[i]
             if type(time) == datetime.time:
-                """ changed logic for grave kpi_d; 
+                """ changed logic for swing kpi_d; 
                     usually same result, but allows available time to start after midnight """
-                if self.schedule_shift.name == 'Grave' and time.hour <= 7:
+                if self.schedule_shift.name == 'Swing' and time.hour <= 3:
                     new_times.append(dft(time, kpi_d + datetime.timedelta(1)))
                 else:
                     new_times.append(dft(time, kpi_d))
